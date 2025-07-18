@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import {
   checkAccountByUsername,
   checkEmail,
+  checkUsername,
+  createAccount,
 } from "../repository/authRepository";
 
 export const login = async (req: Request, res: Response): Promise<void> => {
@@ -65,3 +67,55 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
   }
 };
+
+ export const register = async (req: Request, res: Response): Promise<void> => {
+   const { email, username, password } = req.body as {
+     email: string;
+     username: string;
+     password: string;
+   };
+   try {
+     //Check exiting email
+     const existingEmail = await checkEmail(email);
+     if (existingEmail) {
+       res.status(400).json({
+         status: false,
+         message: "Email already exists.",
+       });
+       return;
+     }
+ 
+     //Check exiting username
+     const existingUsername = await checkUsername(username);
+     if (existingUsername) {
+       res.status(400).json({
+         status: false,
+         message: "Username already exists.",
+       });
+       return;
+     }
+ 
+     //Hash password
+     const hashedPassword = await doHash(password, 10);
+ 
+     //Create account
+     const result = await createAccount(username, hashedPassword, email, "user");
+ 
+     if (!result) {
+       res.status(400).json({
+         status: false,
+         message: "Register failed.",
+       });
+     }
+ 
+     res.status(201).json({
+       success: true,
+       message: "Register successfully",
+     });
+   } catch (error) {
+     res.status(500).json({
+       success: false,
+       message: "Register failed!",
+     });
+   }
+ };
