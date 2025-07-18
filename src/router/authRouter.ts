@@ -1,9 +1,14 @@
 import express, { Router } from 'express';
 import * as authController from '../controller/authController';
+import { validateLogin, validateRegister } from '../middleware/validate';
 
 
 const router: Router = express.Router();
 
-router.post('/login', authController.Login);
+//Route handle login
+router.post('/login',validateLogin ,authController.Login);
+
+//Router handle register
+router.post('/register', validateRegister, authController.Register);
 
 export default router;

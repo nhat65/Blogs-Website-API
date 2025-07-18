@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { doHash, doHashValidation } from "../utils/hashing";
 import jwt from "jsonwebtoken";
 import pool from "../config/database";
-import { RowDataPacket } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 interface Account extends RowDataPacket {
   username: string;
@@ -66,6 +66,54 @@ export const Login = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({
       success: false,
       message: "Internal server error",
+    });
+  }
+};
+
+export const Register = async (req: Request, res: Response): Promise<void> => {
+  const { email, username, password, confirmPassword} = req.body as {
+    email: string,
+    username: string,
+    password: string,
+    confirmPassword: string
+  }
+  try {
+    //Check exiting email
+    const [existingEmail] = await pool.query<Account[]>(`SELECT email FROM account WHERE email = ?`, [email])
+    if(existingEmail.length > 0){
+        res.status(400).json({
+            status: false,
+            message: 'Email already exists.'
+        });
+        return;
+    };
+    //Check exiting username
+    const [existingUsername] = await pool.query<Account[]>(`SELECT username FROM account WHERE username = ?`, [username])
+    if(existingUsername.length > 0){
+        res.status(400).json({
+            status: false,
+            message: 'Username already exists.'
+        });
+        return;
+    };
+
+    //Hash password
+    const hashedPassword = await doHash(password, 10)
+    
+    const [result] = await pool.query(
+      'INSERT INTO account (username, password, email, role) VALUES (?, ?, ?, ?)',
+      [username, hashedPassword, email, "user"],
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Register successfully',
+    });
+  } catch (error) {
+    console.error('Register error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Register failed!'
     });
   }
 };
