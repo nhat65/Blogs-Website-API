@@ -55,19 +55,19 @@ export const checkUsername = async (
   return usernameAccount.username;
 };
 
- export const createAccount = async (
-   username: string,
-   password: string,
-   email: string,
-   role: string
- ): Promise<Boolean> => {
-   const [result] = await pool.query<ResultSetHeader>(
-     `INSERT INTO account (username, password, email, role) VALUES (?, ?, ?, ?)`,
-     [username, password, email, role]
-   );
-   //Check insert successfully
-   if (!result.affectedRows) {
-     return false;
-   }
-   return true;
- };
+export const createAccount = async (
+  username: string,
+  password: string,
+  email: string,
+  role: string
+): Promise<Boolean> => {
+  const [result] = await pool.query<ResultSetHeader>(
+    `INSERT INTO account (username, password, email, role) VALUES (?, ?, ?, ?)`,
+    [username, password, email, role]
+  );
+  //Check insert successfully
+  if (!result.affectedRows) {
+    return false;
+  }
+  return true;
+};

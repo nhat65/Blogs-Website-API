@@ -7,7 +7,7 @@ const router: Router = express.Router();
 //Route handle login
 router.post('/login',validateLogin ,authController.login);
 
-//Router handle register
-router.post('/register', validateRegister, authController.register);
+ //Router handle register
+ router.post('/register', validateRegister, authController.register);
 
 export default router;
