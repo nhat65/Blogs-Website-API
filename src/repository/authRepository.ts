@@ -19,9 +19,6 @@ export const checkAccountByUsername = async (
   );
 
   const account = getFirstElement<Account>(existingAccount);
-  if (!account) {
-    return undefined;
-  }
   return account;
 };
 
@@ -33,9 +30,32 @@ export const checkEmail = async (
     [email]
   );
 
-  const Email = getFirstElement(existingEmail);
-  if (!Email) {
-    return undefined;
-  }
-  return Email.email;
+  const result = getFirstElement(existingEmail);
+  return result?.email;
+};
+
+export const checkUsername = async (
+  username: string
+): Promise<String | undefined> => {
+  const [existingUsername] = await pool.query<Account[]>(
+    `SELECT username FROM account WHERE username = ?`,
+    [username]
+  );
+
+  const result = getFirstElement(existingUsername);
+  return result?.username;
+};
+
+export const createAccount = async (
+  username: string,
+  password: string,
+  email: string,
+  role: string
+): Promise<Boolean> => {
+  const [result] = await pool.query<ResultSetHeader>(
+    `INSERT INTO account (username, password, email, role) VALUES (?, ?, ?, ?)`,
+    [username, password, email, role]
+  );
+
+  return !!result.affectedRows;
 };
