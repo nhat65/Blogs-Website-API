@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { doHash, doHashValidation } from "../utils/hashing";
 import jwt from "jsonwebtoken";
 import pool from "../config/database";
-import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { RowDataPacket } from "mysql2";
 
 interface Account extends RowDataPacket {
   username: string;
@@ -12,7 +12,6 @@ interface Account extends RowDataPacket {
 
 //Login
 export const Login = async (req: Request, res: Response): Promise<void> => {
-    console.log(req.body)
   const { username, password } = req.body as {
     username: string;
     password: string;
@@ -25,6 +24,7 @@ export const Login = async (req: Request, res: Response): Promise<void> => {
             status: false,
             message: 'Account does not exist'
         });
+        return;
     };
 
     //Check password
@@ -65,7 +65,7 @@ export const Login = async (req: Request, res: Response): Promise<void> => {
     console.error("Login error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Login failed",
     });
   }
 };
