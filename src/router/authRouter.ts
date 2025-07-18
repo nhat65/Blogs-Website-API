@@ -10,4 +10,7 @@ router.post('/login',validateLogin ,authController.Login);
 //Router handle register
 router.post('/register', validateRegister, authController.Register);
 
+//Router handle register
+router.post('/register', validateRegister, authController.Register);
+
 export default router;
