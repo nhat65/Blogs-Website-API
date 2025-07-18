@@ -5,7 +5,7 @@ import { validateLogin, validateRegister } from '../middleware/validate';
 const router: Router = express.Router();
 
 //Route handle login
-router.post('/login',validateLogin ,authController.login);
+router.post('/login',validateLogin ,authController.Login);
 
 //Router handle register
 router.post('/register', validateRegister, authController.Register);
