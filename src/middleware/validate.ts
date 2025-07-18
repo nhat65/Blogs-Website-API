@@ -1,19 +1,19 @@
 import Joi from 'joi'
 import { NextFunction, Request, Response } from 'express'
 
-interface login{
+interface Login{
     username: string,
     password: string
 }
 
-interface register{
+interface Register{
     email: string,
     username: string,
     password: string,
     confirmPassword: string
 }
 
-const loginSchema = Joi.object<login>({
+const loginSchema = Joi.object<Login>({
     username: Joi.string()
     .min(6)
     .max(20)
@@ -36,7 +36,7 @@ const loginSchema = Joi.object<login>({
     })
 });
 
-const registerSchema = Joi.object<register>({
+const registerSchema = Joi.object<Register>({
   email: Joi.string()
         .min(6)
         .max(60)
