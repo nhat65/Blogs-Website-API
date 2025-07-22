@@ -11,10 +11,22 @@ import { saveImage } from "../middleware/saveImage";
 const router: Router = express.Router();
 
 //Route handle login
-router.post('/createPost', identifier, saveImage(), validatePost , postController.createPost);
+router.post(
+  "/createPost",
+  identifier,
+  saveImage(),
+  validatePost,
+  postController.createPost
+);
 
 //Route handle user delete their post
-router.delete('/deletePost/:postId', identifier, postController.deleteOwnPost);
+router.delete("/deletePost/:postId", identifier, postController.deleteOwnPost);
+
+//Route handle get comments of post
+router.get("/getComments/:postId", postController.getPostComments);
+
+//Route handle get all post
+router.get("/allPost", postController.getPosts);
 
 //Route handle get all post
 router.get('/allPost', postController.getPosts);
