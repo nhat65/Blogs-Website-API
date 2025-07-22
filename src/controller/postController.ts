@@ -1,7 +1,7 @@
 import { generateSlug } from "../utils/slug";
 import { AuthRequest } from "../middleware/identify";
 import { Request, Response } from "express";
-import { checkSlug, insertPost } from "../repository/postRepository";
+import { checkSlug, deleteUserPost, insertPost } from "../repository/postRepository";
 import { getUserId } from "../repository/userRepository";
 
 export const createPost = async (req: AuthRequest, res: Response) => {
@@ -66,6 +66,34 @@ export const createPost = async (req: AuthRequest, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Create post failed!",
+    });
+  }
+};
+
+export const deleteOwnPost = async (req: AuthRequest, res: Response) => {
+ const postId: number = parseInt(req.params.postId);
+  let userId: number | undefined;
+
+  try {
+    userId = await getUserId(req.user?.accountId);
+    const result = await deleteUserPost(postId, userId)
+
+    if (!result) {
+      res.status(400).json({
+        status: false,
+        message: "Delete post failed.",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Delete post successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Delete post failed!",
     });
   }
 };
