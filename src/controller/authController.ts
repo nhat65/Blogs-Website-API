@@ -41,7 +41,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     //Create token
     const token = jwt.sign(
       {
-        user_id: account.id,
+        accountId: account.id,
         username: account.username,
         role: account.role,
       },
