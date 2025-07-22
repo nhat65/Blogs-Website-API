@@ -87,3 +87,10 @@ export const deleteUserPost = async (
     return false;
   }
 };
+
+export const getAllPost = async ():Promise<Post[] | undefined
+> => {
+  const [posts] = await pool.query<Post[]>(`SELECT * FROM post`)
+
+  return  posts.length ?  posts : undefined
+}

@@ -1,7 +1,12 @@
 import { generateSlug } from "../utils/slug";
 import { AuthRequest } from "../middleware/identify";
 import { Request, Response } from "express";
-import { checkSlug, deleteUserPost, insertPost } from "../repository/postRepository";
+import {
+  checkSlug,
+  deleteUserPost,
+  getAllPost,
+  insertPost,
+} from "../repository/postRepository";
 import { getUserId } from "../repository/userRepository";
 
 export const createPost = async (req: AuthRequest, res: Response) => {
@@ -71,12 +76,12 @@ export const createPost = async (req: AuthRequest, res: Response) => {
 };
 
 export const deleteOwnPost = async (req: AuthRequest, res: Response) => {
- const postId: number = parseInt(req.params.postId);
+  const postId: number = parseInt(req.params.postId);
   let userId: number | undefined;
 
   try {
     userId = await getUserId(req.user?.accountId);
-    const result = await deleteUserPost(postId, userId)
+    const result = await deleteUserPost(postId, userId);
 
     if (!result) {
       res.status(400).json({
@@ -94,6 +99,22 @@ export const deleteOwnPost = async (req: AuthRequest, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Delete post failed!",
+    });
+  }
+};
+
+export const getPosts = async (req: Request, res: Response) => {
+  try {
+    const result = await getAllPost();
+    if (!result) {
+      res.status(404).json({ success: false, message: "There is no post!" });
+      return;
+    }
+    res.status(200).json({ success: false, message: "Get all post successfully", data: result });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to get all post",
     });
   }
 };
