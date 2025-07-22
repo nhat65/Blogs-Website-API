@@ -56,10 +56,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
         status: false,
         message: "Create post failed.",
       });
-<<<<<<< HEAD
       return;
-=======
->>>>>>> develop
     }
 
     res.status(201).json({
@@ -73,7 +70,6 @@ export const createPost = async (req: AuthRequest, res: Response) => {
     });
   }
 };
-<<<<<<< HEAD
 
 export const deleteOwnPost = async (req: AuthRequest, res: Response) => {
  const postId: number = parseInt(req.params.postId);
@@ -103,5 +99,3 @@ export const deleteOwnPost = async (req: AuthRequest, res: Response) => {
     });
   }
 };
-=======
->>>>>>> develop
