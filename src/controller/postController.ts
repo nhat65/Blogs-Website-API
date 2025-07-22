@@ -6,6 +6,7 @@ import {
   deleteUserPost,
   getAllPost,
   getCommentByPostId,
+  getReactionByPostId,
   insertPost,
 } from "../repository/postRepository";
 import { getUserId } from "../repository/userRepository";
@@ -145,6 +146,29 @@ export const getPosts = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Failed to get all post",
+    });
+  }
+};
+
+export const getPostReaction = async (req: Request, res: Response) => {
+  const postId = parseInt(req.params.postId);
+  try {
+    const result = await getReactionByPostId(postId);
+    if (!result) {
+      res.status(404).json({ success: false, message: "There is no reaction!" });
+      return;
+    }
+    res
+      .status(200)
+      .json({
+        success: false,
+        message: "Get post reaction successfully",
+        data: result,
+      });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to get post reaction",
     });
   }
 };
