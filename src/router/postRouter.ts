@@ -1,9 +1,7 @@
 import express, { Router } from "express";
 import * as postController from "../controller/postController";
 import {
-  validateLogin,
   validatePost,
-  validateRegister,
 } from "../middleware/validate";
 import { identifier } from "../middleware/identify";
 import { saveImage } from "../middleware/saveImage";
