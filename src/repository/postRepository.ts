@@ -30,6 +30,17 @@ interface Comment extends RowDataPacket {
   postId: number;
 }
 
+enum ReactionType {
+  Like = 'like',
+  Dislike = 'dislike'
+}
+
+interface Reaction extends RowDataPacket {
+  reaction: ReactionType,
+  userId: number,
+  postId: number
+}
+
 export const insertPost = async (post: PostPayload): Promise<boolean> => {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO post (title, slug, content, image_url, posted_at, status, tag_id, user_id)
@@ -109,4 +120,15 @@ export const getAllPost = async (): Promise<Post[] | undefined> => {
   const [posts] = await pool.query<Post[]>(`SELECT * FROM post`);
 
   return posts.length ? posts : undefined;
+};
+
+export const getReactionByPostId = async (
+  postId: number
+): Promise<Reaction[] | undefined> => {
+  const [reaction] = await pool.query<Reaction[]>(
+    `SELECT * FROM post_reaction WHERE post_id = ?`,
+    [postId]
+  );
+
+  return reaction.length ? reaction : undefined;
 };

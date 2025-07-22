@@ -25,6 +25,9 @@ router.delete("/deletePost/:postId", identifier, postController.deleteOwnPost);
 //Route handle get comments of post
 router.get("/getComments/:postId", postController.getPostComments);
 
+//Route handle get reaction of post
+router.get("/getReaction/:postId", postController.getPostReaction);
+
 //Route handle get all post
 router.get("/allPost", postController.getPosts);
 
