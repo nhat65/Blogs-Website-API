@@ -88,16 +88,16 @@ const postSchema = Joi.object({
     "string.empty": "Title is required",
   }),
   slug: Joi.string()
-  .optional()
-  .empty('')
-  .trim()
-  .pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-  .min(3)
-  .max(255)
-  .messages({
-    "string.pattern.base":
-      "Slug must be lowercase letters, numbers, and hyphens only",
-  }),
+    .optional()
+    .empty("")
+    .trim()
+    .pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .min(3)
+    .max(255)
+    .messages({
+      "string.pattern.base":
+        "Slug must be lowercase letters, numbers, and hyphens only",
+    }),
   content: Joi.string().trim().min(10).required().messages({
     "string.empty": "Content is required",
     "string.min": "Content must be at least 10 characters",
@@ -105,10 +105,8 @@ const postSchema = Joi.object({
   tagId: Joi.number().integer().min(1).required().messages({
     "number.base": "Tag is required",
   }),
-  imageUrl: Joi.string()
-  .optional()
-  .messages({
-    'string.uri': 'Image URL must be a valid URI',
+  imageUrl: Joi.string().optional().messages({
+    "string.uri": "Image URL must be a valid URI",
   }),
 }).options({ abortEarly: true });
 
