@@ -13,4 +13,7 @@ const router: Router = express.Router();
 //Route handle login
 router.post('/createPost', identifier, saveImage(), validatePost , postController.createPost);
 
+//Route handle user delete their post
+router.delete('/deletePost/:postId', identifier, postController.deleteOwnPost);
+
 export default router;

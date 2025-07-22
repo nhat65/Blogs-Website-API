@@ -53,3 +53,38 @@ export const checkSlug = async (
 
   return result.map((post) => post.slug);
 };
+
+export const deleteUserPost = async (
+  postId: number,
+  userId: number | undefined
+): Promise<boolean> => {
+  await pool.query("START TRANSACTION");
+
+  try {
+    await pool.query<ResultSetHeader>(`DELETE FROM comment WHERE post_id = ?`, [
+      postId,
+    ]);
+
+    await pool.query<ResultSetHeader>(
+      `DELETE FROM post_reaction WHERE post_id = ?`,
+      [postId]
+    );
+
+    await pool.query<ResultSetHeader>(`DELETE FROM report WHERE post_id = ?`, [
+      postId,
+    ]);
+
+    const [result] = await pool.query<ResultSetHeader>(
+      `DELETE FROM post WHERE id = ? AND user_id = ?`,
+      [postId, userId]
+    );
+
+    await pool.query("COMMIT");
+
+    return !!result.affectedRows;
+  } catch (error) {
+    console.log(error);
+    await pool.query("ROLLBACK");
+    return false;
+  }
+};
