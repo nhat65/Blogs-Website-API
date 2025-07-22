@@ -16,4 +16,7 @@ router.post('/createPost', identifier, saveImage(), validatePost , postControlle
 //Route handle user delete their post
 router.delete('/deletePost/:postId', identifier, postController.deleteOwnPost);
 
+//Route handle get all post
+router.get('/allPost', postController.getPosts);
+
 export default router;
