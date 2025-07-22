@@ -5,6 +5,7 @@ import {
   checkSlug,
   deleteUserPost,
   getAllPost,
+  getCommentByPostId,
   insertPost,
 } from "../repository/postRepository";
 import { getUserId } from "../repository/userRepository";
@@ -103,6 +104,29 @@ export const deleteOwnPost = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const getPostComments = async (req: Request, res: Response) => {
+  const postId = parseInt(req.params.postId);
+  try {
+    const result = await getCommentByPostId(postId);
+    if (!result) {
+      res.status(404).json({ success: false, message: "There is no comment!" });
+      return;
+    }
+    res
+      .status(200)
+      .json({
+        success: false,
+        message: "Get all comment successfully",
+        data: result,
+      });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to get all comment",
+    });
+  }
+};
+
 export const getPosts = async (req: Request, res: Response) => {
   try {
     const result = await getAllPost();
@@ -110,7 +134,13 @@ export const getPosts = async (req: Request, res: Response) => {
       res.status(404).json({ success: false, message: "There is no post!" });
       return;
     }
-    res.status(200).json({ success: false, message: "Get all post successfully", data: result });
+    res
+      .status(200)
+      .json({
+        success: false,
+        message: "Get all post successfully",
+        data: result,
+      });
   } catch (error) {
     res.status(500).json({
       success: false,

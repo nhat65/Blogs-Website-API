@@ -24,6 +24,12 @@ interface Post extends RowDataPacket {
   userId: number | undefined;
 }
 
+interface Comment extends RowDataPacket {
+  content: string;
+  userId: number;
+  postId: number;
+}
+
 export const insertPost = async (post: PostPayload): Promise<boolean> => {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO post (title, slug, content, image_url, posted_at, status, tag_id, user_id)
@@ -88,9 +94,19 @@ export const deleteUserPost = async (
   }
 };
 
-export const getAllPost = async ():Promise<Post[] | undefined
-> => {
-  const [posts] = await pool.query<Post[]>(`SELECT * FROM post`)
+export const getCommentByPostId = async (
+  postId: number
+): Promise<Comment[] | undefined> => {
+  const [comments] = await pool.query<Comment[]>(
+    `SELECT * FROM comment WHERE post_id = ?`,
+    [postId]
+  );
 
-  return  posts.length ?  posts : undefined
-}
+  return comments.length ? comments : undefined;
+};
+
+export const getAllPost = async (): Promise<Post[] | undefined> => {
+  const [posts] = await pool.query<Post[]>(`SELECT * FROM post`);
+
+  return posts.length ? posts : undefined;
+};
