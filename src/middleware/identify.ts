@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 
 // Interface for JWT payload
 interface JwtPayload {
-  user_id: number;
+  accountId: number;
   username: string;
   role: string;
 }
