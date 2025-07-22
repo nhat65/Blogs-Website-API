@@ -17,7 +17,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
   let postedAt: Date;
   try {
     if (!slug) {
-      slug = generateSlug(slug);
+      slug = generateSlug(title);
 
       const existingSlug = await checkSlug(slug);
       if (existingSlug) {
@@ -34,7 +34,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    userId = await getUserId(req.user?.accountId)
+    userId = await getUserId(req.user?.accountId);
     imageUrl = req.body.imageUrl || null;
     postedAt = new Date();
     status = "posted";
@@ -52,16 +52,16 @@ export const createPost = async (req: AuthRequest, res: Response) => {
     const result = await insertPost(newPost);
 
     if (!result) {
-       res.status(400).json({
-         status: false,
-         message: "Create post failed.",
-       });
-     }
- 
-     res.status(201).json({
-       success: true,
-       message: "Create post successfully",
-     });
+      res.status(400).json({
+        status: false,
+        message: "Create post failed.",
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Create post successfully",
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
