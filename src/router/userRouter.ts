@@ -9,4 +9,7 @@ const router: Router = express.Router();
 //Route handle create user
 router.post("/createUser", identifier, saveImage(), validateUser, userController.createUser);
 
+//Route handle get their user detail
+router.get("/me", identifier, userController.getUserDetail)
+
 export default router;
