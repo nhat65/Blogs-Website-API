@@ -29,9 +29,9 @@ router.get("/getComments/:postId", postController.getPostComments);
 router.get("/getReaction/:postId", postController.getPostReaction);
 
 //Route handle get all post
-router.get("/allPost", postController.getPosts);
+router.get("/", postController.getPosts);
 
-//Route handle get all post
-router.get('/allPost', postController.getPosts);
+//Route handle update post
+router.post('/update/:postId', identifier, saveImage() ,validatePost , postController.updatePost);
 
 export default router;

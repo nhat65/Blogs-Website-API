@@ -6,10 +6,13 @@ import {
   deleteUserPost,
   getAllPost,
   getCommentByPostId,
+  getPostById,
   getReactionByPostId,
   insertPost,
+  updatePostById,
 } from "../repository/postRepository";
 import { getUserId } from "../repository/userRepository";
+import { deleteImage } from "../utils/deleteImage";
 
 export const createPost = async (req: AuthRequest, res: Response) => {
   let { title, slug, content, tagId } = req.body as {
@@ -113,13 +116,11 @@ export const getPostComments = async (req: Request, res: Response) => {
       res.status(404).json({ success: false, message: "There is no comment!" });
       return;
     }
-    res
-      .status(200)
-      .json({
-        success: false,
-        message: "Get all comment successfully",
-        data: result,
-      });
+    res.status(200).json({
+      success: false,
+      message: "Get all comment successfully",
+      data: result,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -135,13 +136,11 @@ export const getPosts = async (req: Request, res: Response) => {
       res.status(404).json({ success: false, message: "There is no post!" });
       return;
     }
-    res
-      .status(200)
-      .json({
-        success: false,
-        message: "Get all post successfully",
-        data: result,
-      });
+    res.status(200).json({
+      success: false,
+      message: "Get all post successfully",
+      data: result,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -169,6 +168,78 @@ export const getPostReaction = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Failed to get post reaction",
+    });
+  }
+};
+
+export const updatePost = async (req: AuthRequest, res: Response) => {
+  let { title, slug, content, tagId } = req.body as {
+    title: string;
+    slug: string | undefined;
+    content: string;
+    tagId: number;
+  };
+  let imageUrl: string | null = req.body.imageUrl || null;
+  const postId = parseInt(req.params.postId);
+  let userId: number | undefined;
+  try {
+    if (!slug) {
+      slug = generateSlug(title);
+
+      const existingSlug = await checkSlug(slug);
+      if (existingSlug) {
+        slug = generateSlug(slug, existingSlug);
+      }
+    }
+
+    const currentPost = await getPostById(postId);
+    if (!currentPost) {
+      return res.status(404).json({ status: false, message: "Post not found" });
+    }
+
+    if (slug !== currentPost?.slug) {
+      const existingSlug = await checkSlug(slug);
+
+      if (existingSlug?.length) {
+        deleteImage(imageUrl);
+        return res.status(400).json({
+          status: false,
+          message: "Slug already exists",
+        });
+      }
+    }
+
+    userId = await getUserId(req.user?.accountId);
+
+    const updatePostPayload = {
+      postId,
+      title,
+      slug,
+      content,
+      imageUrl,
+      tagId,
+      userId,
+    };
+    const result = await updatePostById(updatePostPayload);
+
+    if (!result) {
+      deleteImage(imageUrl);
+      res.status(400).json({
+        status: false,
+        message: "Update post failed.",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Update post successfully",
+    });
+  } catch (error) {
+    deleteImage(imageUrl);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update post",
     });
   }
 };
