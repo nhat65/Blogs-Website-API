@@ -37,6 +37,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
 
     const existingSlug = await checkSlug(slug);
     if (existingSlug?.length) {
+      deleteImage(imageUrl)
       res.status(400).json({
         status: false,
         message: "Slug already exists.",
@@ -62,6 +63,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
     const result = await insertPost(newPost);
 
     if (!result) {
+      deleteImage(imageUrl)
       res.status(400).json({
         status: false,
         message: "Create post failed.",
@@ -73,6 +75,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
       message: "Create post successfully",
     });
   } catch (error) {
+    deleteImage(imageUrl)
     res.status(500).json({
       success: false,
       message: "Create post failed!",

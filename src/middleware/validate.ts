@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { NextFunction, Request, Response } from "express";
+import { deleteImage } from "../utils/deleteImage";
 
 interface Login {
   username: string;
@@ -117,6 +118,7 @@ export const validatePost = (
 ) => {
   const { error } = postSchema.validate(req.body);
   if (error) {
+    deleteImage(req.body.imageUrl)
     return res
       .status(400)
       .json({ status: false, message: error.details[0].message });
