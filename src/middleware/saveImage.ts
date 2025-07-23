@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import upload from "../config/multer";
+import { AuthRequest } from "./identify";
 
 export const saveImage = (fieldName: string = "image") => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
     const uploadMiddleware = upload.single(fieldName);
     uploadMiddleware(req, res, (err) => {
       if (err) {
@@ -13,7 +14,9 @@ export const saveImage = (fieldName: string = "image") => {
           .status(400)
           .json({ success: false, message: "No image uploaded" });
       }
-      req.body.imageUrl = `/uploads/${req.file.filename}`;
+      
+      const accountId = req.user?.accountId;
+      req.body.imageUrl = `/uploads/account_${accountId}/${req.file.filename}`;
       next();
     });
   };

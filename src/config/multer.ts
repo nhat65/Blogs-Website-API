@@ -1,12 +1,25 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { AuthRequest } from "../middleware/identify";
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, "../uploads");
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-    cb(null, uploadDir);
+  destination: (req: AuthRequest, file, cb) => {
+    const accountId = req.user?.accountId
+    if (!accountId) {
+      return cb(new Error("User ID is required"), "");
+    }
+
+    const accountUploadDir = path.join(__dirname, "../uploads", `account_${accountId}`);
+    if (!fs.existsSync(accountUploadDir)) {
+      try {
+        fs.mkdirSync(accountUploadDir, { recursive: true });
+      } catch (err) {
+        return cb(new Error("Failed to create user directory"), "");
+      }
+    }
+    
+    cb(null, accountUploadDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
