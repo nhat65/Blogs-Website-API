@@ -1,6 +1,7 @@
 import Joi from "joi";
 import { NextFunction, Request, Response } from "express";
 import { deleteImage } from "../utils/deleteImage";
+import { AuthRequest } from "./identify";
 
 interface Login {
   username: string;
@@ -18,8 +19,15 @@ interface Post {
   title: string;
   slug: string;
   content: string;
-  image?: Express.Multer.File | null;
+  imageUrl: string | null;
   tagId: number;
+}
+
+interface User {
+  fullName: string,
+  bio?: string,
+  imageUrl?: string,
+  country: string,  
 }
 
 const loginSchema = Joi.object<Login>({
@@ -84,7 +92,7 @@ const registerSchema = Joi.object<Register>({
     }),
 });
 
-const postSchema = Joi.object({
+const postSchema = Joi.object<Post>({
   title: Joi.string().min(3).max(255).required().messages({
     "string.empty": "Title is required",
   }),
@@ -111,14 +119,47 @@ const postSchema = Joi.object({
   }),
 }).options({ abortEarly: true });
 
+const userSchema = Joi.object<User>({
+  fullName: Joi.string().min(3).max(50).required().messages({
+    "string.empty": "Full name is required",
+    "string.min": "Full name must be at least 3 characters",
+    "string.max": "Full name should not exceed 50 characters",
+  }),
+  bio: Joi.string().allow('').min(5).max(250).optional().messages({
+    "string.min": "Bio must be at least 5 characters",
+    "string.max": "Bio should not exceed 250 characters",
+  }),
+  imageUrl: Joi.string().optional().messages({
+    "string.uri": "Image URL must be a valid URI",
+  }),
+  country: Joi.string().required().messages({
+    "string.empty": "Country is required",
+  }),
+});
+
+export const validateUser = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const { error } = userSchema.validate(req.body);
+  if (error) {
+    deleteImage(req.body.imageUrl, req.user?.accountId)
+    return res
+      .status(400)
+      .json({ status: false, message: error.details[0].message });
+  }
+  next();
+};
+
 export const validatePost = (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   const { error } = postSchema.validate(req.body);
   if (error) {
-    deleteImage(req.body.imageUrl)
+    deleteImage(req.body.imageUrl, req.user?.accountId)
     return res
       .status(400)
       .json({ status: false, message: error.details[0].message });

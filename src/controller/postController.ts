@@ -37,7 +37,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
 
     const existingSlug = await checkSlug(slug);
     if (existingSlug?.length) {
-      deleteImage(imageUrl)
+      deleteImage(imageUrl, req.user?.accountId)
       res.status(400).json({
         status: false,
         message: "Slug already exists.",
@@ -63,11 +63,12 @@ export const createPost = async (req: AuthRequest, res: Response) => {
     const result = await insertPost(newPost);
 
     if (!result) {
-      deleteImage(imageUrl)
+      deleteImage(imageUrl, req.user?.accountId)
       res.status(400).json({
         status: false,
         message: "Create post failed.",
       });
+      return;
     }
 
     res.status(201).json({
@@ -75,7 +76,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
       message: "Create post successfully",
     });
   } catch (error) {
-    deleteImage(imageUrl)
+    deleteImage(imageUrl, req.user?.accountId)
     res.status(500).json({
       success: false,
       message: "Create post failed!",
@@ -204,7 +205,7 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
       const existingSlug = await checkSlug(slug);
 
       if (existingSlug?.length) {
-        deleteImage(imageUrl);
+        deleteImage(imageUrl, req.user?.accountId);
         return res.status(400).json({
           status: false,
           message: "Slug already exists",
@@ -223,10 +224,10 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
       tagId,
       userId,
     };
-    const result = await updatePostById(updatePostPayload);
+    const result = await updatePostById(updatePostPayload, req.user?.accountId);
 
     if (!result) {
-      deleteImage(imageUrl);
+      deleteImage(imageUrl, req.user?.accountId);
       res.status(400).json({
         status: false,
         message: "Update post failed.",
@@ -239,7 +240,7 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
       message: "Update post successfully",
     });
   } catch (error) {
-    deleteImage(imageUrl);
+    deleteImage(imageUrl, req.user?.accountId);
     res.status(500).json({
       success: false,
       message: "Failed to update post",

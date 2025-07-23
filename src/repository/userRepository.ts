@@ -11,6 +11,16 @@ interface User extends RowDataPacket {
   country: string;
   accountId: number;
 }
+
+interface UserPayload {
+  fullName: string;
+  bio: string | null;
+  avatarUrl: string | null;
+  joinedAt: Date;
+  country: string;
+  accountId: number | undefined;
+}
+
 export const getUserId = async (
   accountId: number | undefined
 ): Promise<number | undefined> => {
@@ -21,4 +31,18 @@ export const getUserId = async (
 
   const result = getFirstElement(userId);
   return result?.id;
+};
+
+export const insertUser = async (user: UserPayload): Promise<boolean> => {
+  try {
+    const [result] = await pool.query<ResultSetHeader>(
+      `INSERT INTO user(full_name, bio, avatar_url, joined_at, country, account_id) 
+      VALUES (?, ?, ?, ?, ?, ?)`,
+      [user.fullName, user.bio, user.avatarUrl, user.joinedAt, user.country, user.accountId]
+    );
+
+    return !!result.affectedRows;
+  } catch (error) {
+    return false;
+  }
 };

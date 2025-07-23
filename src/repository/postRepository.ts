@@ -156,7 +156,8 @@ export const getPostById = async (
 };
 
 export const updatePostById = async (
-  updatePost: PostUpdatePayload
+  updatePost: PostUpdatePayload,
+  accountId: number | undefined
 ): Promise<boolean> => {
   try {
     const [result] = await pool.query<ResultSetHeader>(
@@ -176,7 +177,7 @@ export const updatePostById = async (
 
     return !!result.affectedRows;
   } catch (error) {
-    deleteImage(updatePost.imageUrl);
+    deleteImage(updatePost.imageUrl, accountId);
     return false;
   }
 };
