@@ -29,8 +29,7 @@ export const getUserId = async (
     [accountId]
   );
 
-  const result = getFirstElement(userId);
-  return result?.id;
+  return getFirstElement(userId)?.id;
 };
 
 export const insertUser = async (user: UserPayload): Promise<boolean> => {
@@ -44,5 +43,20 @@ export const insertUser = async (user: UserPayload): Promise<boolean> => {
     return !!result.affectedRows;
   } catch (error) {
     return false;
+  }
+};
+
+export const getUserByAccountId = async (
+  accountId: number | undefined
+): Promise<User | undefined> => {
+  try {
+    const [user] = await pool.query<User[]>(
+      `SELECT * FROM user WHERE account_id = ?`,
+      [accountId]
+    );
+
+    return getFirstElement(user);
+  } catch (error) {
+    return undefined;
   }
 };
