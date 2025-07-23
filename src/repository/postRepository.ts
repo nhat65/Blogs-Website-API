@@ -1,6 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import pool from "../config/database";
 import { getFirstElement } from "../utils/getFirstElement";
+import { deleteImage } from "../utils/deleteImage";
 
 interface PostPayload {
   title: string;
@@ -11,6 +12,16 @@ interface PostPayload {
   status: string;
   tagId: number;
   userId: number | undefined;
+}
+
+interface PostUpdatePayload {
+  postId: number;
+  title: string;
+  slug: string;
+  content: string;
+  imageUrl: string | null;
+  tagId: number;
+  userId: number | undefined
 }
 
 interface Post extends RowDataPacket {
@@ -131,4 +142,41 @@ export const getReactionByPostId = async (
   );
 
   return reaction.length ? reaction : undefined;
+};
+
+export const getPostById = async (
+  postId: number
+): Promise<Post | undefined> => {
+  const [post] = await pool.query<Post[]>(
+    `SELECT * FROM post WHERE id = ?`,
+    postId
+  );
+
+  return getFirstElement(post);
+};
+
+export const updatePostById = async (
+  updatePost: PostUpdatePayload
+): Promise<boolean> => {
+  try {
+    const [result] = await pool.query<ResultSetHeader>(
+      `UPDATE post 
+  SET title = ?, slug = ?, content = ?, image_url = ?, tag_id = ?
+  WHERE id = ? AND user_id = ?`,
+      [
+        updatePost.title,
+        updatePost.slug,
+        updatePost.content,
+        updatePost.imageUrl,
+        updatePost.tagId,
+        updatePost.postId,
+        updatePost.userId,
+      ]
+    );
+
+    return !!result.affectedRows;
+  } catch (error) {
+    deleteImage(updatePost.imageUrl);
+    return false;
+  }
 };
