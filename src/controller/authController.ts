@@ -14,9 +14,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     password: string;
   };
   try {
-    //Check account
     const account = await checkAccountByUsername(username);
-
     if (!account) {
       res.status(404).json({
         success: false,
@@ -25,7 +23,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    //Check password
     const passwordValidation = await doHashValidation(
       password,
       account.password
@@ -38,7 +35,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    //Create token
     const token = jwt.sign(
       {
         accountId: account.id,
@@ -61,9 +57,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         message: "Login successfully!",
       });
   } catch (error) {
-    res.status(500).json({
+    res.status(400).json({
       success: false,
-      message: "Login failed",
+      message: "Login failed!",
     });
   }
 };
@@ -75,7 +71,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     password: string;
   };
   try {
-    //Check exiting email
     const existingEmail = await checkEmail(email);
     if (existingEmail) {
       res.status(400).json({
@@ -85,7 +80,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    //Check exiting username
     const existingUsername = await checkUsername(username);
     if (existingUsername) {
       res.status(400).json({
@@ -95,12 +89,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    //Hash password
     const hashedPassword = await doHash(password, 10);
 
-    //Create account
     const result = await createAccount(username, hashedPassword, email, "user");
-
     if (!result) {
       res.status(400).json({
         status: false,
@@ -113,9 +104,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       message: "Register successfully",
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(400).json({
       success: false,
-      message: "Register failed!",
+      message: "[Register] Request failed!",
     });
   }
 };

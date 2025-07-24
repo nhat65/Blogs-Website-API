@@ -14,10 +14,4 @@ router.post("/register", validateRegister, authController.register);
 //Router handle logout
 router.post("/logout", identifier, authController.register);
 
- //Router handle register
- router.post('/register', validateRegister, authController.register);
-
-//Router handle logout
-router.post('/logout', identifier, authController.register);
-
 export default router;

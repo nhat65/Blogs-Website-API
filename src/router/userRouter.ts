@@ -7,7 +7,7 @@ import { saveImage } from "../middleware/saveImage";
 const router: Router = express.Router();
 
 //Route handle create user
-router.post("/createUser", identifier, saveImage(), validateUser, userController.createUser);
+router.post("/create", identifier, saveImage(), validateUser, userController.createUser);
 
 //Route handle get their user detail
 router.get("/me", identifier, userController.getUserDetail)
