@@ -119,7 +119,7 @@ export const getCommentByPostId = async (
   postId: number
 ): Promise<Comment[] | undefined> => {
   const [comments] = await pool.query<Comment[]>(
-    `SELECT * FROM comment WHERE post_id = ?`,
+    `SELECT * FROM comment WHERE post_id = ? AND  parent_id IS NULL`,
     [postId]
   );
 
