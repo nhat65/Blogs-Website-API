@@ -4,6 +4,7 @@ import 'dotenv/config'
 import authRouter from './router/authRouter'
 import postRouter from './router/postRouter'
 import userRouter from './router/userRouter'
+import commentRouter from './router/commentRouter'
 
 import multer from 'multer';
 
@@ -14,6 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRouter);
 app.use('/api/post', postRouter);
 app.use('/api/user', userRouter);
+app.use('/api/comment', commentRouter);
 
 const PORT = process.env.PORT || 3000;
 
