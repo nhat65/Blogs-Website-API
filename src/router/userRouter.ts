@@ -12,4 +12,7 @@ router.post("/create", identifier, saveImage(), validateUser, userController.cre
 //Route handle get their user detail
 router.get("/me", identifier, userController.getUserDetail)
 
+//Route handle update user profile
+router.post("/update/:userId", identifier, saveImage(), validateUser, userController.updateUserProfile)
+
 export default router;

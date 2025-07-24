@@ -9,14 +9,11 @@ export const saveImage = (fieldName: string = "image") => {
       if (err) {
         return res.status(400).json({ success: false, message: err.message });
       }
-      if (!req.file) {
-        return res
-          .status(400)
-          .json({ success: false, message: "No image uploaded" });
+      if (req.file) {
+        const accountId = req.user?.accountId;
+        req.body.imageUrl = `/uploads/account_${accountId}/${req.file.filename}`;
       }
-      
-      const accountId = req.user?.accountId;
-      req.body.imageUrl = `/uploads/account_${accountId}/${req.file.filename}`;
+
       next();
     });
   };

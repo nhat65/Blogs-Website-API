@@ -21,6 +21,14 @@ interface UserPayload {
   accountId: number | undefined;
 }
 
+interface UserUpdatePayload {
+  fullName: string;
+  bio: string | null;
+  avatarUrl: string | null;
+  country: string;
+  userId: number | undefined;
+}
+
 export const getUserId = async (
   accountId: number | undefined
 ): Promise<number | undefined> => {
@@ -37,7 +45,14 @@ export const insertUser = async (user: UserPayload): Promise<boolean> => {
     const [result] = await pool.query<ResultSetHeader>(
       `INSERT INTO user(full_name, bio, avatar_url, joined_at, country, account_id) 
       VALUES (?, ?, ?, ?, ?, ?)`,
-      [user.fullName, user.bio, user.avatarUrl, user.joinedAt, user.country, user.accountId]
+      [
+        user.fullName,
+        user.bio,
+        user.avatarUrl,
+        user.joinedAt,
+        user.country,
+        user.accountId,
+      ]
     );
 
     return !!result.affectedRows;
@@ -58,5 +73,28 @@ export const getUserByAccountId = async (
     return getFirstElement(user);
   } catch (error) {
     return undefined;
+  }
+};
+
+export const updateUser = async (
+  updateUser: UserUpdatePayload
+): Promise<boolean> => {
+  try {
+    const [result] = await pool.query<ResultSetHeader>(
+      `UPDATE user 
+    SET full_name = ?, bio = ?, avatar_url = ?, country = ? 
+    WHERE id = ?`,
+      [
+        updateUser.fullName,
+        updateUser.bio,
+        updateUser.avatarUrl,
+        updateUser.country,
+        updateUser.userId
+      ]
+    );
+
+    return !!result.affectedRows;
+  } catch (error) {
+    return false;
   }
 };

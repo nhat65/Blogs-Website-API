@@ -1,7 +1,6 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import pool from "../config/database";
 import { getFirstElement } from "../utils/getFirstElement";
-import { deleteImage } from "../utils/deleteImage";
 
 interface PostPayload {
   title: string;
@@ -177,7 +176,6 @@ export const updatePostById = async (
 
     return !!result.affectedRows;
   } catch (error) {
-    deleteImage(updatePost.imageUrl, accountId);
     return false;
   }
 };
