@@ -30,6 +30,12 @@ interface User {
   country: string,  
 }
 
+interface Comment {
+  content: string,
+  postId: number,
+  parentId: number | null
+}
+
 const loginSchema = Joi.object<Login>({
   username: Joi.string().min(6).max(20).required().messages({
     "string.base": "Username must be a string.",
@@ -136,6 +142,28 @@ const userSchema = Joi.object<User>({
     "string.empty": "Country is required",
   }),
 });
+
+const commentSchema = Joi.object<Comment>({
+  postId: Joi.number().required(),
+  content: Joi.string().min(1).max(1000).required().messages({
+    "string.empty": "Comment is required",
+  }),
+  parentId: Joi.number().optional()
+});
+
+export const validateComment = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { error } = commentSchema.validate(req.body);
+  if (error) {
+    return res
+      .status(400)
+      .json({ status: false, message: error.details[0].message });
+  }
+  next();
+};
 
 export const validateUser = (
   req: AuthRequest,
