@@ -14,32 +14,32 @@ export const createUser = async (req: AuthRequest, res: Response) => {
   const joinedAt: Date = new Date();
   try {
     const userPayload = {
-        fullName,
-        bio,
-        avatarUrl,
-        country,
-        joinedAt,
-        accountId
-    }
+      fullName,
+      bio,
+      avatarUrl,
+      country,
+      joinedAt,
+      accountId,
+    };
     const result = await insertUser(userPayload);
     if (!result) {
-        deleteImage(avatarUrl, accountId)
-          res.status(400).json({
-            status: false,
-            message: "Create user failed.",
-          });
-          return
-        }
-    
-        res.status(201).json({
-          success: true,
-          message: "Create user successfully",
-        });
+      deleteImage(avatarUrl, accountId);
+      res.status(400).json({
+        status: false,
+        message: "Create user failed.",
+      });
+      return;
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Create user successfully",
+    });
   } catch (error) {
-    deleteImage(avatarUrl, accountId)
-    res.status(500).json({
+    deleteImage(avatarUrl, accountId);
+    res.status(400).json({
       success: false,
-      message: "Create user failed!",
+      message: "[User][Create] Request failed!",
     });
   }
 };
@@ -59,13 +59,12 @@ export const getUserDetail = async (req: AuthRequest, res: Response) => {
     res.status(201).json({
       success: true,
       message: "Get user detail successfully",
-      data: result
+      data: result,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: "Get user detail failed!"
+      message: "[User][GetDetail] Request failed!",
     });
   }
 };
-

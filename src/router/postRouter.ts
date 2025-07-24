@@ -20,7 +20,7 @@ router.post(
 );
 
 //Route handle user delete their post
-router.delete("/deletePost/:postId", identifier, postController.deleteOwnPost);
+router.delete("/:postId", identifier, postController.deleteOwnPost);
 
 //Route handle get comments of post
 router.get("/getComments/:postId", postController.getPostComments);
