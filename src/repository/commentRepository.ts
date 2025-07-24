@@ -4,8 +4,16 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 interface CommentPayload {
   content: string;
+  createAt: Date;
   userId: number | undefined;
   postId: number;
+  parentId: number | null;
+}
+
+interface UpdateCommentPayload {
+  commentId: number;
+  content: string;
+  userId: number | undefined;
   parentId: number | null;
 }
 
@@ -22,9 +30,15 @@ export const insertComment = async (
 ): Promise<boolean> => {
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      `INSERT INTO comment(content, user_id, post_id, parent_id) 
-            VALUES (?, ?, ?, ?)`,
-      [comment.content, comment.userId, comment.postId, comment.parentId]
+      `INSERT INTO comment(content, create_at, user_id, post_id, parent_id) 
+            VALUES (?, ?, ?, ?, ?)`,
+      [
+        comment.content,
+        comment.createAt,
+        comment.userId,
+        comment.postId,
+        comment.parentId,
+      ]
     );
 
     return !!result.affectedRows;
@@ -46,5 +60,26 @@ export const checkParentComment = async (
     return getFirstElement(comment)?.id;
   } catch (error) {
     return undefined;
+  }
+};
+
+export const updateUserComment = async (
+  updateComment: UpdateCommentPayload
+): Promise<boolean> => {
+  try {
+    if (updateComment.parentId) {
+      const [result] = await pool.query<ResultSetHeader>(
+        `UPDATE comment SET content = ? WHERE id = ? AND user_id = ? AND parent_id = ?`,
+        [updateComment.content, updateComment.commentId, updateComment.userId, updateComment.parentId]
+      );
+    }
+    const [result] = await pool.query<ResultSetHeader>(
+      `UPDATE comment SET content = ? WHERE id = ? AND user_id = ?`,
+      [updateComment.content, updateComment.commentId, updateComment.userId]
+    );
+
+    return !!result.affectedRows;
+  } catch (error) {
+    return false;
   }
 };
