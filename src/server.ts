@@ -5,6 +5,7 @@ import authRouter from './router/authRouter'
 import postRouter from './router/postRouter'
 import userRouter from './router/userRouter'
 import commentRouter from './router/commentRouter'
+import accountRouter from './router/accountRouter'
 
 import multer from 'multer';
 
@@ -16,6 +17,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/post', postRouter);
 app.use('/api/user', userRouter);
 app.use('/api/comment', commentRouter);
+app.use('/api/account', accountRouter);
 
 const PORT = process.env.PORT || 3000;
 

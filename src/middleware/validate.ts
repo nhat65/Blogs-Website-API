@@ -2,6 +2,7 @@ import Joi from "joi";
 import { NextFunction, Request, Response } from "express";
 import { deleteImage } from "../utils/deleteImage";
 import { AuthRequest } from "./identify";
+import { Role } from "../constant/enum";
 
 interface Login {
   username: string;
@@ -13,6 +14,8 @@ interface Register {
   username: string;
   password: string;
   confirmPassword: string;
+  createBy: number | null;
+  role: Role;
 }
 
 interface Post {
@@ -24,16 +27,16 @@ interface Post {
 }
 
 interface User {
-  fullName: string,
-  bio?: string,
-  imageUrl?: string,
-  country: string,  
+  fullName: string;
+  bio?: string;
+  imageUrl?: string;
+  country: string;
 }
 
 interface Comment {
-  content: string,
-  postId: number,
-  parentId: number | null
+  content: string;
+  postId: number;
+  parentId: number | null;
 }
 
 const loginSchema = Joi.object<Login>({
@@ -96,6 +99,8 @@ const registerSchema = Joi.object<Register>({
       "string.min": "Confirm password must be at least 7 characters long",
       "any.only": "Confirm password must match password",
     }),
+  createBy: Joi.number().optional(),
+  role: Joi.string().optional(),
 });
 
 const postSchema = Joi.object<Post>({
@@ -131,7 +136,7 @@ const userSchema = Joi.object<User>({
     "string.min": "Full name must be at least 3 characters",
     "string.max": "Full name should not exceed 50 characters",
   }),
-  bio: Joi.string().allow('').min(5).max(250).optional().messages({
+  bio: Joi.string().allow("").min(5).max(250).optional().messages({
     "string.min": "Bio must be at least 5 characters",
     "string.max": "Bio should not exceed 250 characters",
   }),
@@ -148,7 +153,7 @@ const commentSchema = Joi.object<Comment>({
   content: Joi.string().min(1).max(1000).required().messages({
     "string.empty": "Comment is required",
   }),
-  parentId: Joi.number().optional()
+  parentId: Joi.number().optional(),
 });
 
 export const validateComment = (
@@ -172,7 +177,7 @@ export const validateUser = (
 ) => {
   const { error } = userSchema.validate(req.body);
   if (error) {
-    deleteImage(req.body.imageUrl, req.user?.accountId)
+    deleteImage(req.body.imageUrl, req.user?.accountId);
     return res
       .status(400)
       .json({ status: false, message: error.details[0].message });
@@ -187,7 +192,7 @@ export const validatePost = (
 ) => {
   const { error } = postSchema.validate(req.body);
   if (error) {
-    deleteImage(req.body.imageUrl, req.user?.accountId)
+    deleteImage(req.body.imageUrl, req.user?.accountId);
     return res
       .status(400)
       .json({ status: false, message: error.details[0].message });

@@ -7,6 +7,7 @@ import {
   checkUsername,
   createAccount,
 } from "../repository/authRepository";
+import { Role } from "../constant/enum";
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   const { username, password } = req.body as {
@@ -70,6 +71,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     username: string;
     password: string;
   };
+  const role: Role = Role.USER;
+  const createBy: number | null = null;
   try {
     const existingEmail = await checkEmail(email);
     if (existingEmail) {
@@ -91,7 +94,15 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     const hashedPassword = await doHash(password, 10);
 
-    const result = await createAccount(username, hashedPassword, email, "user");
+    const accountPayload = {
+      username,
+      hashedPassword,
+      email,
+      role,
+      createBy,
+    };
+
+    const result = await createAccount(accountPayload);
     if (!result) {
       res.status(400).json({
         status: false,
