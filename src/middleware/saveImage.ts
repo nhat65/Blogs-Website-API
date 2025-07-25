@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
-import upload from "../config/multer";
-import { AuthRequest } from "./identify";
+import { Request, Response, NextFunction } from 'express';
+import upload from '../config/multer';
+import { AuthRequest } from './identify';
 
-export const saveImage = (fieldName: string = "image") => {
+export const saveImage = (fieldName: string = 'image') => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     const uploadMiddleware = upload.single(fieldName);
     uploadMiddleware(req, res, (err) => {

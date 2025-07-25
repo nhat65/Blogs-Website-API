@@ -14,11 +14,7 @@ export interface AuthRequest extends Request {
 }
 
 // Identify token
-export const identifier = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void => {
+export const identifier = (req: AuthRequest, res: Response, next: NextFunction): void => {
   let token: string | undefined;
 
   // Determine token source based on client type
@@ -37,7 +33,7 @@ export const identifier = (
   // Check if token exists
   if (!token) {
     res.status(403).json({ success: false, message: 'Unauthorized: No token provided' });
-    return; 
+    return;
   }
 
   // Verify token

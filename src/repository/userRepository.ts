@@ -1,15 +1,15 @@
-import { ResultSetHeader, RowDataPacket } from "mysql2";
-import pool from "../config/database";
-import { getFirstElement } from "../utils/getFirstElement";
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
+import pool from '../config/database';
+import { getFirstElement } from '../utils/getFirstElement';
 
 interface User extends RowDataPacket {
   id: number;
   fullName: string;
   bio?: string;
-  avatar: string;
-  joinedAt: Date;
+  avatarUrl: string;
   country: string;
   accountId: number;
+  joinedAt: Date;
 }
 
 interface UserPayload {
@@ -29,13 +29,12 @@ interface UserUpdatePayload {
   userId: number | undefined;
 }
 
-export const getUserId = async (
-  accountId: number | undefined
+export const getUserIdByAccountId = async (
+  accountId: number | undefined,
 ): Promise<number | undefined> => {
-  const [userId] = await pool.query<User[]>(
-    `SELECT id FROM user WHERE account_id = ?`,
-    [accountId]
-  );
+  const [userId] = await pool.query<User[]>(`SELECT id FROM user WHERE account_id = ?`, [
+    accountId,
+  ]);
 
   return getFirstElement(userId)?.id;
 };
@@ -45,14 +44,7 @@ export const insertUser = async (user: UserPayload): Promise<boolean> => {
     const [result] = await pool.query<ResultSetHeader>(
       `INSERT INTO user(full_name, bio, avatar_url, joined_at, country, account_id) 
       VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        user.fullName,
-        user.bio,
-        user.avatarUrl,
-        user.joinedAt,
-        user.country,
-        user.accountId,
-      ]
+      [user.fullName, user.bio, user.avatarUrl, user.joinedAt, user.country, user.accountId],
     );
 
     return !!result.affectedRows;
@@ -62,13 +54,10 @@ export const insertUser = async (user: UserPayload): Promise<boolean> => {
 };
 
 export const getUserByAccountId = async (
-  accountId: number | undefined
+  accountId: number | undefined,
 ): Promise<User | undefined> => {
   try {
-    const [user] = await pool.query<User[]>(
-      `SELECT * FROM user WHERE account_id = ?`,
-      [accountId]
-    );
+    const [user] = await pool.query<User[]>(`SELECT * FROM user WHERE account_id = ?`, [accountId]);
 
     return getFirstElement(user);
   } catch (error) {
@@ -76,9 +65,7 @@ export const getUserByAccountId = async (
   }
 };
 
-export const updateUser = async (
-  updateUser: UserUpdatePayload
-): Promise<boolean> => {
+export const updateUser = async (updateUser: UserUpdatePayload): Promise<boolean> => {
   try {
     const [result] = await pool.query<ResultSetHeader>(
       `UPDATE user 
@@ -89,8 +76,8 @@ export const updateUser = async (
         updateUser.bio,
         updateUser.avatarUrl,
         updateUser.country,
-        updateUser.userId
-      ]
+        updateUser.userId,
+      ],
     );
 
     return !!result.affectedRows;

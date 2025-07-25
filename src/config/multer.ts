@@ -1,24 +1,24 @@
-import multer from "multer";
-import path from "path";
-import fs from "fs";
-import { AuthRequest } from "../middleware/identify";
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { AuthRequest } from '../middleware/identify';
 
 const storage = multer.diskStorage({
   destination: (req: AuthRequest, file, cb) => {
-    const accountId = req.user?.accountId
+    const accountId = req.user?.accountId;
     if (!accountId) {
-      return cb(new Error("User ID is required"), "");
+      return cb(new Error('User ID is required'), '');
     }
 
-    const accountUploadDir = path.join(__dirname, "../uploads", `account_${accountId}`);
+    const accountUploadDir = path.join(__dirname, '../uploads', `account_${accountId}`);
     if (!fs.existsSync(accountUploadDir)) {
       try {
         fs.mkdirSync(accountUploadDir, { recursive: true });
       } catch (err) {
-        return cb(new Error("Failed to create user directory"), "");
+        return cb(new Error('Failed to create user directory'), '');
       }
     }
-    
+
     cb(null, accountUploadDir);
   },
   filename: (req, file, cb) => {
@@ -33,12 +33,10 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|gif/;
-    const extname = filetypes.test(
-      path.extname(file.originalname).toLowerCase()
-    );
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = filetypes.test(file.mimetype);
     if (extname && mimetype) cb(null, true);
-    else cb(new Error("Only images are allowed!"));
+    else cb(new Error('Only images are allowed!'));
   },
 });
 

@@ -1,12 +1,12 @@
-import { deleteImage } from "../utils/deleteImage";
-import { AuthRequest } from "../middleware/identify";
+import { deleteImage } from '../utils/deleteImage';
+import { AuthRequest } from '../middleware/identify';
 import {
   getUserByAccountId,
-  getUserId,
+  getUserIdByAccountId,
   insertUser,
   updateUser,
-} from "../repository/userRepository";
-import { Request, Response } from "express";
+} from '../repository/userRepository';
+import { Request, Response } from 'express';
 
 export const createUser = async (req: AuthRequest, res: Response) => {
   const { fullName, bio, country } = req.body as {
@@ -31,20 +31,20 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       deleteImage(avatarUrl, accountId);
       res.status(400).json({
         status: false,
-        message: "Create user failed.",
+        message: 'Create user failed.',
       });
       return;
     }
 
     res.status(201).json({
       success: true,
-      message: "Create user successfully",
+      message: 'Create user successfully',
     });
   } catch (error) {
     deleteImage(avatarUrl, accountId);
     res.status(400).json({
       success: false,
-      message: "[User][Create] Request failed!",
+      message: '[User][Create] Request failed!',
     });
   }
 };
@@ -56,20 +56,20 @@ export const getUserDetail = async (req: AuthRequest, res: Response) => {
     if (!result) {
       res.status(404).json({
         status: false,
-        message: "User not found.",
+        message: 'User not found.',
       });
       return;
     }
 
     res.status(201).json({
       success: true,
-      message: "Get user detail successfully",
+      message: 'Get user detail successfully',
       data: result,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: "[User][GetDetail] Request failed!",
+      message: '[User][GetDetail] Request failed!',
     });
   }
 };
@@ -84,12 +84,12 @@ export const updateUserProfile = async (req: AuthRequest, res: Response) => {
   const accountId: number | undefined = req.user?.accountId;
   const avatarUrl: string | null = req.body.imageUrl || null;
   try {
-    userId = await getUserId(accountId);
+    userId = await getUserIdByAccountId(accountId);
     if (!userId) {
       deleteImage(avatarUrl, accountId);
       res.status(404).json({
         status: false,
-        message: "User not found.",
+        message: 'User not found.',
       });
       return;
     }
@@ -107,19 +107,19 @@ export const updateUserProfile = async (req: AuthRequest, res: Response) => {
       deleteImage(avatarUrl, accountId);
       res.status(400).json({
         status: false,
-        message: "Update user failed!",
+        message: 'Update user failed!',
       });
       return;
     }
 
     res.status(200).json({
       status: true,
-      message: "Update user successfully!",
+      message: 'Update user successfully!',
     });
   } catch (error) {
     res.status(400).json({
       status: false,
-      message: "[User][Update] Request failed!",
+      message: '[User][Update] Request failed!',
     });
   }
 };

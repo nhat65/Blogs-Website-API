@@ -1,12 +1,9 @@
-import {
-  checkEmail,
-  checkUsername,
-  createAccount,
-} from "../repository/authRepository";
-import { AuthRequest } from "../middleware/identify";
-import { Request, Response } from "express";
-import { doHash } from "../utils/hashing";
-import { getUserByAccountId } from "../repository/userRepository";
+import { checkEmail, checkUsername, createAccount } from '../repository/authRepository';
+import { AuthRequest } from '../middleware/identify';
+import { Request, Response } from 'express';
+import { doHash, doHashValidation } from '../utils/hashing';
+import { getUserByAccountId } from '../repository/userRepository';
+import { getAccountById, updatePassword } from '../repository/accountRepository';
 
 export const createAccountByAdmin = async (req: AuthRequest, res: Response) => {
   const { email, username, password, role } = req.body as {
@@ -18,21 +15,21 @@ export const createAccountByAdmin = async (req: AuthRequest, res: Response) => {
   const accountId: number | undefined = req.user?.accountId;
   let createBy: number | null = null;
   try {
-    const existingUser = await getUserByAccountId(accountId);
-    if (!existingUser) {
+    const existingAdmin = await getUserByAccountId(accountId);
+    if (!existingAdmin) {
       res.status(404).json({
         status: false,
-        message: "User not found.",
+        message: 'Admin not found.',
       });
       return;
     }
-    createBy = existingUser.id;
+    createBy = existingAdmin.id;
 
     const existingEmail = await checkEmail(email);
     if (existingEmail) {
       res.status(400).json({
         status: false,
-        message: "Email already exists.",
+        message: 'Email already exists.',
       });
       return;
     }
@@ -41,7 +38,7 @@ export const createAccountByAdmin = async (req: AuthRequest, res: Response) => {
     if (existingUsername) {
       res.status(400).json({
         status: false,
-        message: "Username already exists.",
+        message: 'Username already exists.',
       });
       return;
     }
@@ -59,18 +56,78 @@ export const createAccountByAdmin = async (req: AuthRequest, res: Response) => {
     if (!result) {
       res.status(400).json({
         status: false,
-        message: "Create account failed.",
+        message: 'Create account failed.',
       });
     }
 
     res.status(201).json({
       success: true,
-      message: "Create account successfully",
+      message: 'Create account successfully',
     });
   } catch (error) {
     res.status(400).json({
       status: false,
-      message: "[Account][CreateByAdmin] Request failed!",
+      message: '[Account][CreateByAdmin] Request failed!',
+    });
+  }
+};
+
+export const changePassword = async (req: AuthRequest, res: Response) => {
+  const { currentPassword, newPassword } = req.body as {
+    currentPassword: string;
+    newPassword: string;
+  };
+  const accountId: number | undefined = req.user?.accountId;
+  try {
+    const existingAccount = await getAccountById(accountId);
+    if (!existingAccount) {
+      res.status(404).json({
+        status: false,
+        message: 'User account not found.',
+      });
+      return;
+    }
+
+    const oldPasswordValidation = await doHashValidation(currentPassword, existingAccount.password);
+    if (!oldPasswordValidation) {
+      res.status(401).json({
+        success: false,
+        message: 'Current password is wrong!',
+      });
+      return;
+    }
+
+    const checkNewPassword = currentPassword === newPassword;
+    if (checkNewPassword) {
+      res.status(401).json({
+        success: false,
+        message: 'The new password must not be the same as your current password!',
+      });
+      return;
+    }
+
+    const hashedPassword = await doHash(newPassword, 10);
+    const changePasswordPayload = {
+      hashedPassword,
+      accountId,
+    };
+
+    const result = await updatePassword(changePasswordPayload);
+    if (!result) {
+      res.status(400).json({
+        status: false,
+        message: 'Change password failed.',
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Change password successfully',
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      message: '[Account][ChangePassword] Request failed!',
     });
   }
 };
