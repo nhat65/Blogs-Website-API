@@ -10,6 +10,14 @@ interface Account extends RowDataPacket {
   role: string;
 }
 
+interface AccountPayLoad {
+  username: string;
+  hashedPassword: string;
+  email: string;
+  role: string;
+  createBy: number | null;
+}
+
 export const checkAccountByUsername = async (
   username: string
 ): Promise<Account | undefined> => {
@@ -47,14 +55,17 @@ export const checkUsername = async (
 };
 
 export const createAccount = async (
-  username: string,
-  password: string,
-  email: string,
-  role: string
+  account: AccountPayLoad
 ): Promise<Boolean> => {
   const [result] = await pool.query<ResultSetHeader>(
-    `INSERT INTO account (username, password, email, role) VALUES (?, ?, ?, ?)`,
-    [username, password, email, role]
+    `INSERT INTO account (username, password, email, role, create_by) VALUES (?, ?, ?, ?, ?)`,
+    [
+      account.username,
+      account.hashedPassword,
+      account.email,
+      account.role,
+      account.createBy,
+    ]
   );
 
   return !!result.affectedRows;
