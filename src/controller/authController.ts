@@ -1,13 +1,13 @@
-import { Request, Response } from "express";
-import { doHash, doHashValidation } from "../utils/hashing";
-import jwt from "jsonwebtoken";
+import { Request, Response } from 'express';
+import { doHash, doHashValidation } from '../utils/hashing';
+import jwt from 'jsonwebtoken';
 import {
   checkAccountByUsername,
   checkEmail,
   checkUsername,
   createAccount,
-} from "../repository/authRepository";
-import { Role } from "../constant/enum";
+} from '../repository/authRepository';
+import { Role } from '../constant/enum';
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   const { username, password } = req.body as {
@@ -19,19 +19,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!account) {
       res.status(404).json({
         success: false,
-        message: "Username does not exist",
+        message: 'Username does not exist',
       });
       return;
     }
 
-    const passwordValidation = await doHashValidation(
-      password,
-      account.password
-    );
+    const passwordValidation = await doHashValidation(password, account.password);
     if (!passwordValidation) {
       res.status(401).json({
         success: false,
-        message: "Wrong password!",
+        message: 'Wrong password!',
       });
       return;
     }
@@ -43,24 +40,24 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         role: account.role,
       },
       process.env.TOKEN_SECRET as string,
-      { expiresIn: "8h" }
+      { expiresIn: '8h' },
     );
 
     res
-      .cookie("Authorization", "Bearer " + token, {
+      .cookie('Authorization', 'Bearer ' + token, {
         expires: new Date(Date.now() + 8 * 3600000),
-        httpOnly: process.env.NODE_ENV === "production",
-        secure: process.env.NODE_ENV === "production",
+        httpOnly: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production',
       })
       .json({
         success: true,
         token,
-        message: "Login successfully!",
+        message: 'Login successfully!',
       });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: "Login failed!",
+      message: 'Login failed!',
     });
   }
 };
@@ -78,7 +75,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     if (existingEmail) {
       res.status(400).json({
         status: false,
-        message: "Email already exists.",
+        message: 'Email already exists.',
       });
       return;
     }
@@ -87,7 +84,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     if (existingUsername) {
       res.status(400).json({
         status: false,
-        message: "Username already exists.",
+        message: 'Username already exists.',
       });
       return;
     }
@@ -106,25 +103,25 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     if (!result) {
       res.status(400).json({
         status: false,
-        message: "Register failed.",
+        message: 'Register failed.',
       });
     }
 
     res.status(201).json({
       success: true,
-      message: "Register successfully",
+      message: 'Register successfully',
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: "[Register] Request failed!",
+      message: '[Register] Request failed!',
     });
   }
 };
 
 export const logout = async (_req: Request, res: Response): Promise<void> => {
   res
-    .clearCookie("Authorization")
+    .clearCookie('Authorization')
     .status(200)
-    .json({ success: true, message: "Logout successfully!" });
+    .json({ success: true, message: 'Logout successfully!' });
 };

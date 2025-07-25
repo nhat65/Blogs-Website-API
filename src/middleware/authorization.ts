@@ -8,7 +8,7 @@ export const authorize = (...allowedRoles: string[]) => {
         success: false,
         message: 'Unauthorized: No user role found',
       });
-      return; 
+      return;
     }
 
     if (!allowedRoles.includes(req.user.role)) {
@@ -16,9 +16,9 @@ export const authorize = (...allowedRoles: string[]) => {
         success: false,
         message: 'Forbidden: Insufficient permissions',
       });
-      return; 
+      return;
     }
 
-    next(); 
+    next();
   };
 };

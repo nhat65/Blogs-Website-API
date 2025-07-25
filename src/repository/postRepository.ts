@@ -1,6 +1,6 @@
-import { ResultSetHeader, RowDataPacket } from "mysql2";
-import pool from "../config/database";
-import { getFirstElement } from "../utils/getFirstElement";
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
+import pool from '../config/database';
+import { getFirstElement } from '../utils/getFirstElement';
 
 interface PostPayload {
   title: string;
@@ -20,7 +20,7 @@ interface PostUpdatePayload {
   content: string;
   imageUrl: string | null;
   tagId: number;
-  userId: number | undefined
+  userId: number | undefined;
 }
 
 interface Post extends RowDataPacket {
@@ -42,13 +42,13 @@ interface Comment extends RowDataPacket {
 
 enum ReactionType {
   Like = 'like',
-  Dislike = 'dislike'
+  Dislike = 'dislike',
 }
 
 interface Reaction extends RowDataPacket {
-  reaction: ReactionType,
-  userId: number,
-  postId: number
+  reaction: ReactionType;
+  userId: number;
+  postId: number;
 }
 
 export const insertPost = async (post: PostPayload): Promise<boolean> => {
@@ -64,63 +64,51 @@ export const insertPost = async (post: PostPayload): Promise<boolean> => {
       post.status,
       post.tagId,
       post.userId,
-    ]
+    ],
   );
 
   return !!result.affectedRows;
 };
 
-export const checkSlug = async (
-  slug: string
-): Promise<string[] | undefined> => {
-  const [result] = await pool.query<Post[]>(
-    `SELECT slug FROM post WHERE slug LIKE ?`,
-    [`${slug}%`]
-  );
+export const checkSlug = async (slug: string): Promise<string[] | undefined> => {
+  const [result] = await pool.query<Post[]>(`SELECT slug FROM post WHERE slug LIKE ?`, [
+    `${slug}%`,
+  ]);
 
   return result.map((post) => post.slug);
 };
 
 export const deleteUserPost = async (
   postId: number,
-  userId: number | undefined
+  userId: number | undefined,
 ): Promise<boolean> => {
-  await pool.query("START TRANSACTION");
+  await pool.query('START TRANSACTION');
 
   try {
-    await pool.query<ResultSetHeader>(`DELETE FROM comment WHERE post_id = ?`, [
-      postId,
-    ]);
+    await pool.query<ResultSetHeader>(`DELETE FROM comment WHERE post_id = ?`, [postId]);
 
-    await pool.query<ResultSetHeader>(
-      `DELETE FROM post_reaction WHERE post_id = ?`,
-      [postId]
-    );
+    await pool.query<ResultSetHeader>(`DELETE FROM post_reaction WHERE post_id = ?`, [postId]);
 
-    await pool.query<ResultSetHeader>(`DELETE FROM report WHERE post_id = ?`, [
-      postId,
-    ]);
+    await pool.query<ResultSetHeader>(`DELETE FROM report WHERE post_id = ?`, [postId]);
 
     const [result] = await pool.query<ResultSetHeader>(
       `DELETE FROM post WHERE id = ? AND user_id = ?`,
-      [postId, userId]
+      [postId, userId],
     );
 
-    await pool.query("COMMIT");
+    await pool.query('COMMIT');
 
     return !!result.affectedRows;
   } catch (error) {
-    await pool.query("ROLLBACK");
+    await pool.query('ROLLBACK');
     return false;
   }
 };
 
-export const getCommentByPostId = async (
-  postId: number
-): Promise<Comment[] | undefined> => {
+export const getCommentByPostId = async (postId: number): Promise<Comment[] | undefined> => {
   const [comments] = await pool.query<Comment[]>(
     `SELECT * FROM comment WHERE post_id = ? AND  parent_id IS NULL`,
-    [postId]
+    [postId],
   );
 
   return comments.length ? comments : undefined;
@@ -132,31 +120,23 @@ export const getAllPost = async (): Promise<Post[] | undefined> => {
   return posts.length ? posts : undefined;
 };
 
-export const getReactionByPostId = async (
-  postId: number
-): Promise<Reaction[] | undefined> => {
-  const [reaction] = await pool.query<Reaction[]>(
-    `SELECT * FROM post_reaction WHERE post_id = ?`,
-    [postId]
-  );
+export const getReactionByPostId = async (postId: number): Promise<Reaction[] | undefined> => {
+  const [reaction] = await pool.query<Reaction[]>(`SELECT * FROM post_reaction WHERE post_id = ?`, [
+    postId,
+  ]);
 
   return reaction.length ? reaction : undefined;
 };
 
-export const getPostById = async (
-  postId: number
-): Promise<Post | undefined> => {
-  const [post] = await pool.query<Post[]>(
-    `SELECT * FROM post WHERE id = ?`,
-    postId
-  );
+export const getPostById = async (postId: number): Promise<Post | undefined> => {
+  const [post] = await pool.query<Post[]>(`SELECT * FROM post WHERE id = ?`, postId);
 
   return getFirstElement(post);
 };
 
 export const updatePostById = async (
   updatePost: PostUpdatePayload,
-  accountId: number | undefined
+  accountId: number | undefined,
 ): Promise<boolean> => {
   try {
     const [result] = await pool.query<ResultSetHeader>(
@@ -171,7 +151,7 @@ export const updatePostById = async (
         updatePost.tagId,
         updatePost.postId,
         updatePost.userId,
-      ]
+      ],
     );
 
     return !!result.affectedRows;

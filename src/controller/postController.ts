@@ -1,6 +1,6 @@
-import { generateSlug } from "../utils/slug";
-import { AuthRequest } from "../middleware/identify";
-import { Request, Response } from "express";
+import { generateSlug } from '../utils/slug';
+import { AuthRequest } from '../middleware/identify';
+import { Request, Response } from 'express';
 import {
   checkSlug,
   deleteUserPost,
@@ -10,9 +10,9 @@ import {
   getReactionByPostId,
   insertPost,
   updatePostById,
-} from "../repository/postRepository";
-import { getUserId } from "../repository/userRepository";
-import { deleteImage } from "../utils/deleteImage";
+} from '../repository/postRepository';
+import { getUserIdByAccountId } from '../repository/userRepository';
+import { deleteImage } from '../utils/deleteImage';
 
 export const createPost = async (req: AuthRequest, res: Response) => {
   let { title, slug, content, tagId } = req.body as {
@@ -40,15 +40,15 @@ export const createPost = async (req: AuthRequest, res: Response) => {
       deleteImage(imageUrl, req.user?.accountId);
       res.status(400).json({
         status: false,
-        message: "Slug already exists.",
+        message: 'Slug already exists.',
       });
       return;
     }
 
-    userId = await getUserId(req.user?.accountId);
+    userId = await getUserIdByAccountId(req.user?.accountId);
     imageUrl = req.body.imageUrl || null;
     postedAt = new Date();
-    status = "posted";
+    status = 'posted';
 
     const newPost = {
       title,
@@ -65,20 +65,20 @@ export const createPost = async (req: AuthRequest, res: Response) => {
       deleteImage(imageUrl, req.user?.accountId);
       res.status(400).json({
         status: false,
-        message: "Create post failed.",
+        message: 'Create post failed.',
       });
       return;
     }
 
     res.status(201).json({
       success: true,
-      message: "Create post successfully",
+      message: 'Create post successfully',
     });
   } catch (error) {
     deleteImage(imageUrl, req.user?.accountId);
     res.status(400).json({
       success: false,
-      message: "[Post][Create] Request failed!",
+      message: '[Post][Create] Request failed!',
     });
   }
 };
@@ -88,24 +88,24 @@ export const deleteOwnPost = async (req: AuthRequest, res: Response) => {
   let userId: number | undefined;
 
   try {
-    userId = await getUserId(req.user?.accountId);
+    userId = await getUserIdByAccountId(req.user?.accountId);
     const result = await deleteUserPost(postId, userId);
     if (!result) {
       res.status(400).json({
         status: false,
-        message: "Delete post failed.",
+        message: 'Delete post failed.',
       });
       return;
     }
 
     res.status(200).json({
       success: true,
-      message: "Delete post successfully",
+      message: 'Delete post successfully',
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: "[Post][Delete] Request failed!",
+      message: '[Post][Delete] Request failed!',
     });
   }
 };
@@ -115,19 +115,19 @@ export const getPostComments = async (req: Request, res: Response) => {
   try {
     const result = await getCommentByPostId(postId);
     if (!result) {
-      res.status(404).json({ success: false, message: "There is no comment!" });
+      res.status(404).json({ success: false, message: 'There is no comment!' });
       return;
     }
 
     res.status(200).json({
       success: false,
-      message: "Get all comment successfully",
+      message: 'Get all comment successfully',
       data: result,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: "Failed to get all comment",
+      message: 'Failed to get all comment',
     });
   }
 };
@@ -136,19 +136,19 @@ export const getPosts = async (req: Request, res: Response) => {
   try {
     const result = await getAllPost();
     if (!result) {
-      res.status(404).json({ success: false, message: "There is no post!" });
+      res.status(404).json({ success: false, message: 'There is no post!' });
       return;
     }
 
     res.status(200).json({
       success: false,
-      message: "Get all post successfully",
+      message: 'Get all post successfully',
       data: result,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: "[Post][GetAll] Request failed!",
+      message: '[Post][GetAll] Request failed!',
     });
   }
 };
@@ -158,21 +158,19 @@ export const getPostReaction = async (req: Request, res: Response) => {
   try {
     const result = await getReactionByPostId(postId);
     if (!result) {
-      res
-        .status(404)
-        .json({ success: false, message: "There is no reaction!" });
+      res.status(404).json({ success: false, message: 'There is no reaction!' });
       return;
     }
 
     res.status(200).json({
       success: false,
-      message: "Get post reaction successfully",
+      message: 'Get post reaction successfully',
       data: result,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: "Failed to get post reaction",
+      message: 'Failed to get post reaction',
     });
   }
 };
@@ -199,7 +197,7 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
 
     const currentPost = await getPostById(postId);
     if (!currentPost) {
-      return res.status(404).json({ status: false, message: "Post not found" });
+      return res.status(404).json({ status: false, message: 'Post not found' });
     }
 
     if (slug !== currentPost?.slug) {
@@ -208,12 +206,12 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
         deleteImage(imageUrl, req.user?.accountId);
         return res.status(400).json({
           status: false,
-          message: "Slug already exists",
+          message: 'Slug already exists',
         });
       }
     }
 
-    userId = await getUserId(req.user?.accountId);
+    userId = await getUserIdByAccountId(req.user?.accountId);
 
     const updatePostPayload = {
       postId,
@@ -230,20 +228,20 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
       deleteImage(imageUrl, req.user?.accountId);
       res.status(400).json({
         status: false,
-        message: "Update post failed.",
+        message: 'Update post failed.',
       });
       return;
     }
 
     res.status(200).json({
       success: true,
-      message: "Update post successfully",
+      message: 'Update post successfully',
     });
   } catch (error) {
     deleteImage(imageUrl, req.user?.accountId);
     res.status(400).json({
       success: false,
-      message: "[Post][Update] Request failed!",
+      message: '[Post][Update] Request failed!',
     });
   }
 };

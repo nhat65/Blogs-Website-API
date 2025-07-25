@@ -1,15 +1,15 @@
 import express, { Request, Response } from 'express';
-import 'dotenv/config'
+import 'dotenv/config';
 
-import authRouter from './router/authRouter'
-import postRouter from './router/postRouter'
-import userRouter from './router/userRouter'
-import commentRouter from './router/commentRouter'
-import accountRouter from './router/accountRouter'
+import authRouter from './router/authRouter';
+import postRouter from './router/postRouter';
+import userRouter from './router/userRouter';
+import commentRouter from './router/commentRouter';
+import accountRouter from './router/accountRouter';
 
 import multer from 'multer';
 
-const app = express()
+const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

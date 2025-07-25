@@ -1,12 +1,12 @@
-import { AuthRequest } from "../middleware/identify";
+import { AuthRequest } from '../middleware/identify';
 import {
   checkParentComment,
   insertComment,
   updateUserComment,
-} from "../repository/commentRepository";
-import { getPostById } from "../repository/postRepository";
-import { getUserByAccountId, getUserId } from "../repository/userRepository";
-import { Request, Response } from "express";
+} from '../repository/commentRepository';
+import { getPostById } from '../repository/postRepository';
+import { getUserByAccountId, getUserIdByAccountId } from '../repository/userRepository';
+import { Request, Response } from 'express';
 
 export const createComment = async (req: AuthRequest, res: Response) => {
   const {
@@ -18,11 +18,11 @@ export const createComment = async (req: AuthRequest, res: Response) => {
   const accountId: number | undefined = req.user?.accountId;
   const createAt: Date = new Date();
   try {
-    userId = await getUserId(accountId);
+    userId = await getUserIdByAccountId(accountId);
     if (!userId) {
       res.status(404).json({
         status: false,
-        message: "User not found!",
+        message: 'User not found!',
       });
       return;
     }
@@ -31,7 +31,7 @@ export const createComment = async (req: AuthRequest, res: Response) => {
     if (!existingPost) {
       res.status(404).json({
         status: false,
-        message: "Post not found!",
+        message: 'Post not found!',
       });
       return;
     }
@@ -41,7 +41,7 @@ export const createComment = async (req: AuthRequest, res: Response) => {
       if (!existingParentId) {
         res.status(404).json({
           status: false,
-          message: "Comment parent not found!",
+          message: 'Comment parent not found!',
         });
         return;
       }
@@ -58,25 +58,25 @@ export const createComment = async (req: AuthRequest, res: Response) => {
     if (!result) {
       res.status(400).json({
         status: false,
-        message: "Create comment failed!",
+        message: 'Create comment failed!',
       });
       return;
     }
 
     res.status(201).json({
       status: true,
-      message: "Comment successfully.",
+      message: 'Comment successfully.',
     });
   } catch (error) {
     res.status(400).json({
       status: false,
-      message: "[Comment][Create] Request failed!",
+      message: '[Comment][Create] Request failed!',
     });
   }
 };
 
 export const updateComment = async (req: AuthRequest, res: Response) => {
-const {
+  const {
     content,
     postId,
     parentId = null,
@@ -85,11 +85,11 @@ const {
   const accountId: number | undefined = req.user?.accountId;
   const commentId = parseInt(req.params.commentId);
   try {
-    userId = await getUserId(accountId);
+    userId = await getUserIdByAccountId(accountId);
     if (!userId) {
       res.status(404).json({
         status: false,
-        message: "User not found!",
+        message: 'User not found!',
       });
       return;
     }
@@ -98,7 +98,7 @@ const {
     if (!existingPost) {
       res.status(404).json({
         status: false,
-        message: "Post not found!",
+        message: 'Post not found!',
       });
       return;
     }
@@ -108,7 +108,7 @@ const {
       if (!existingParentId) {
         res.status(404).json({
           status: false,
-          message: "Comment parent not found!",
+          message: 'Comment parent not found!',
         });
         return;
       }
@@ -118,26 +118,25 @@ const {
       commentId,
       content,
       userId,
-      parentId
+      parentId,
     };
     const result = await updateUserComment(comment);
     if (!result) {
       res.status(400).json({
         status: false,
-        message: "Update comment failed!",
+        message: 'Update comment failed!',
       });
       return;
     }
 
     res.status(200).json({
       status: true,
-      message: "Comment successfully.",
+      message: 'Comment successfully.',
     });
-    
-} catch (error) {
+  } catch (error) {
     res.status(400).json({
-        status: false,
-        message: '[Comment][Update] Request failed!'
-    })
-}
+      status: false,
+      message: '[Comment][Update] Request failed!',
+    });
+  }
 };
