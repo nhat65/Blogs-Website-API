@@ -46,6 +46,19 @@ interface Password {
   confirmPassword: string;
 }
 
+interface Tag {
+  name: string;
+  slug: string;
+}
+
+const tagSchema = Joi.object<Tag>({
+  name: Joi.string().min(3).max(50).required().messages({
+    'string.empty': 'Tag name is required',
+    'string.min': 'Tag name must be at least 3 characters',
+    'string.max': 'Tag name should not exceed 50 characters',
+  }),
+});
+
 const passwordSchema = Joi.object<Password>({
   currentPassword: Joi.string()
     .optional()
@@ -186,6 +199,14 @@ const commentSchema = Joi.object<Comment>({
   }),
   parentId: Joi.number().optional(),
 });
+
+export const validateTag = (req: Request, res: Response, next: NextFunction) => {
+  const { error } = tagSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ status: false, message: error.details[0].message });
+  }
+  next();
+};
 
 export const validatePassword = (req: Request, res: Response, next: NextFunction) => {
   const { error } = passwordSchema.validate(req.body);

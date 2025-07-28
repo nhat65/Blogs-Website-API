@@ -6,6 +6,7 @@ import postRouter from './router/postRouter';
 import userRouter from './router/userRouter';
 import commentRouter from './router/commentRouter';
 import accountRouter from './router/accountRouter';
+import tagRouter from './router/tagRouter';
 
 import multer from 'multer';
 import { getAllPostSchedule } from './repository/postRepository';
@@ -20,6 +21,7 @@ app.use('/api/post', postRouter);
 app.use('/api/user', userRouter);
 app.use('/api/comment', commentRouter);
 app.use('/api/account', accountRouter);
+app.use('/api/tags', tagRouter);
 
 schedulePostPublication();
 
