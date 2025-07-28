@@ -24,6 +24,7 @@ interface Post {
   content: string;
   imageUrl: string | null;
   tagId: number;
+  publishAt: Date;
 }
 
 interface User {
@@ -153,7 +154,12 @@ const postSchema = Joi.object<Post>({
   imageUrl: Joi.string().optional().messages({
     'string.uri': 'Image URL must be a valid URI',
   }),
-}).options({ abortEarly: true });
+  publishAt: Joi.date().iso().optional().messages({
+    'date.base': 'Publish time must be a valid date',
+    'date.format': 'Publish time must be in ISO 8601 format',
+    'any.required': 'Publish time is required',
+  }),
+});
 
 const userSchema = Joi.object<User>({
   fullName: Joi.string().min(3).max(50).required().messages({

@@ -19,9 +19,12 @@ router.get('/getComments/:postId', postController.getPostComments);
 router.get('/getReaction/:postId', postController.getPostReaction);
 
 //Route handle get all post
-router.get('/', postController.getPosts);
+router.get('/', postController.getPostedPosts);
 
 //Route handle update post
 router.post('/update/:postId', identifier, saveImage(), validatePost, postController.updatePost);
+
+//Router handle schedule post
+router.post('/schedule', identifier, saveImage(), validatePost, postController.schedulePost);
 
 export default router;

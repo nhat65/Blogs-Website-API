@@ -1,6 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import pool from '../config/database';
 import { getFirstElement } from '../utils/getFirstElement';
+import { ReactionType } from '../constant/enum';
 
 interface PostPayload {
   title: string;
@@ -24,6 +25,7 @@ interface PostUpdatePayload {
 }
 
 interface Post extends RowDataPacket {
+  id: number;
   title: string;
   slug: string;
   content: string;
@@ -40,15 +42,21 @@ interface Comment extends RowDataPacket {
   postId: number;
 }
 
-enum ReactionType {
-  Like = 'like',
-  Dislike = 'dislike',
-}
-
 interface Reaction extends RowDataPacket {
   reaction: ReactionType;
   userId: number;
   postId: number;
+}
+
+interface SchedulePostPayload {
+  title: string;
+  slug: string;
+  content: string;
+  imageUrl: string | null;
+  publishAt: Date;
+  status: string;
+  tagId: number;
+  userId: number | undefined;
 }
 
 export const insertPost = async (post: PostPayload): Promise<boolean> => {
@@ -114,8 +122,10 @@ export const getCommentByPostId = async (postId: number): Promise<Comment[] | un
   return comments.length ? comments : undefined;
 };
 
-export const getAllPost = async (): Promise<Post[] | undefined> => {
-  const [posts] = await pool.query<Post[]>(`SELECT * FROM post`);
+export const getAllPostedPost = async (): Promise<Post[] | undefined> => {
+  const [posts] = await pool.query<Post[]>(
+    `SELECT * FROM post WHERE status = 'posted' ORDER BY published_at DESC`,
+  );
 
   return posts.length ? posts : undefined;
 };
@@ -157,5 +167,52 @@ export const updatePostById = async (
     return !!result.affectedRows;
   } catch (error) {
     return false;
+  }
+};
+
+export const updatePostSchedule = async (postId: number): Promise<boolean> => {
+  const currentDate = new Date();
+  try {
+    const [result] = await pool.query<ResultSetHeader>(
+      `UPDATE post SET status = 'posted', published_at = ? WHERE id = ?`,
+      [currentDate, postId],
+    );
+
+    return !!result.affectedRows;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const insertSchedulePost = async (post: SchedulePostPayload): Promise<boolean> => {
+  const [result] = await pool.query<ResultSetHeader>(
+    `INSERT INTO post (title, slug, content, image_url, publish_at, status, tag_id, user_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      post.title,
+      post.slug,
+      post.content,
+      post.imageUrl,
+      post.publishAt,
+      post.status,
+      post.tagId,
+      post.userId,
+    ],
+  );
+
+  return !!result.affectedRows;
+};
+
+export const getAllPostSchedule = async (): Promise<number[] | undefined> => {
+  const currentDate = new Date();
+  try {
+    const [posts] = await pool.query<Post[]>(
+      `SELECT id FROM post WHERE publish_at <= ? AND status = 'scheduled'`,
+      [currentDate],
+    );
+
+    return posts.length ? posts.map((post) => Number(post.id)) : undefined;
+  } catch (error) {
+    return undefined;
   }
 };

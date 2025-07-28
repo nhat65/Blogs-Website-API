@@ -8,6 +8,8 @@ import commentRouter from './router/commentRouter';
 import accountRouter from './router/accountRouter';
 
 import multer from 'multer';
+import { getAllPostSchedule } from './repository/postRepository';
+import { schedulePostPublication } from './utils/postSchedule';
 
 const app = express();
 app.use(express.json());
@@ -18,6 +20,8 @@ app.use('/api/post', postRouter);
 app.use('/api/user', userRouter);
 app.use('/api/comment', commentRouter);
 app.use('/api/account', accountRouter);
+
+schedulePostPublication();
 
 const PORT = process.env.PORT || 3000;
 

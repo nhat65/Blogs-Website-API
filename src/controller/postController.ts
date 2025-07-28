@@ -4,11 +4,12 @@ import { Request, Response } from 'express';
 import {
   checkSlug,
   deleteUserPost,
-  getAllPost,
+  getAllPostedPost,
   getCommentByPostId,
   getPostById,
   getReactionByPostId,
   insertPost,
+  insertSchedulePost,
   updatePostById,
 } from '../repository/postRepository';
 import { getUserIdByAccountId } from '../repository/userRepository';
@@ -132,9 +133,9 @@ export const getPostComments = async (req: Request, res: Response) => {
   }
 };
 
-export const getPosts = async (req: Request, res: Response) => {
+export const getPostedPosts = async (req: Request, res: Response) => {
   try {
-    const result = await getAllPost();
+    const result = await getAllPostedPost();
     if (!result) {
       res.status(404).json({ success: false, message: 'There is no post!' });
       return;
@@ -242,6 +243,74 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
     res.status(400).json({
       success: false,
       message: '[Post][Update] Request failed!',
+    });
+  }
+};
+
+export const schedulePost = async (req: AuthRequest, res: Response) => {
+  let { title, slug, content, tagId, publishAt } = req.body as {
+    title: string;
+    slug: string;
+    content: string;
+    tagId: number;
+    publishAt: Date;
+  };
+  let imageUrl: string | null = null;
+  let status: string;
+  let userId: number | undefined;
+  try {
+    if (!slug) {
+      slug = generateSlug(title);
+
+      const existingSlug = await checkSlug(slug);
+      if (existingSlug) {
+        slug = generateSlug(slug, existingSlug);
+      }
+    }
+
+    const existingSlug = await checkSlug(slug);
+    if (existingSlug?.length) {
+      deleteImage(imageUrl, req.user?.accountId);
+      res.status(400).json({
+        status: false,
+        message: 'Slug already exists.',
+      });
+      return;
+    }
+
+    userId = await getUserIdByAccountId(req.user?.accountId);
+    imageUrl = req.body.imageUrl || null;
+    status = 'scheduled';
+
+    const newPost = {
+      title,
+      slug,
+      content,
+      imageUrl,
+      publishAt,
+      status,
+      tagId,
+      userId,
+    };
+    const result = await insertSchedulePost(newPost);
+    if (!result) {
+      deleteImage(imageUrl, req.user?.accountId);
+      res.status(400).json({
+        status: false,
+        message: 'Create post schedule failed.',
+      });
+      return;
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Create post schedule successfully',
+    });
+  } catch (error) {
+    deleteImage(imageUrl, req.user?.accountId);
+    res.status(400).json({
+      success: false,
+      message: '[Post][Create Schedule] Request failed!',
     });
   }
 };
