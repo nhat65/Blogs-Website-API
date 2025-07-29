@@ -7,6 +7,7 @@ import {
   getAllPostedPost,
   getCommentByPostId,
   getPostById,
+  getPostDetailBySlug,
   getReactionByPostId,
   insertPost,
   insertSchedulePost,
@@ -311,6 +312,28 @@ export const schedulePost = async (req: AuthRequest, res: Response) => {
     res.status(400).json({
       success: false,
       message: '[Post][Create Schedule] Request failed!',
+    });
+  }
+};
+
+export const getPostDetail = async (req: Request, res: Response) => {
+  const { postSlug } = req.params;
+  try {
+    const result = await getPostDetailBySlug(postSlug);
+    if (!result) {
+      res.status(404).json({ success: false, message: 'Post not found!' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Get post detail successfully',
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: '[Post][GetDetail] Request failed!',
     });
   }
 };

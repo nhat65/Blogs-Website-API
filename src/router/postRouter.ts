@@ -27,4 +27,7 @@ router.post('/update/:postId', identifier, saveImage(), validatePost, postContro
 //Router handle schedule post
 router.post('/schedule', identifier, saveImage(), validatePost, postController.schedulePost);
 
+//Route handle get post detail by slug
+router.get('/detail/:postSlug', postController.getPostDetail);
+
 export default router;

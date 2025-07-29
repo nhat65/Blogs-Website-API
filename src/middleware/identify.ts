@@ -43,7 +43,10 @@ export const identifier = (req: AuthRequest, res: Response, next: NextFunction):
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.TOKEN_SECRET) as JwtPayload;
+    const decoded = jwt.verify(
+      token.replace('Bearer ', ''),
+      process.env.TOKEN_SECRET,
+    ) as JwtPayload;
     req.user = decoded;
     next();
   } catch (error: any) {
