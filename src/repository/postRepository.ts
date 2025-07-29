@@ -123,11 +123,20 @@ export const getCommentByPostId = async (postId: number): Promise<Comment[] | un
 };
 
 export const getAllPostedPost = async (): Promise<Post[] | undefined> => {
-  const [posts] = await pool.query<Post[]>(
-    `SELECT * FROM post WHERE status = 'posted' ORDER BY published_at DESC`,
-  );
+  try {
+    const [posts] = await pool.query<Post[]>(
+      `SELECT u.id, u.full_name, u.avatar_url, p.id, p.slug, p.title, p.image_url, p.published_at, t.slug AS tag_slug 
+    FROM post p 
+    JOIN user u ON p.user_id = u.id
+    JOIN tag t ON p.tag_id = t.id
+    WHERE p.status = 'posted'
+    ORDER BY p.published_at DESC;`,
+    );
 
-  return posts.length ? posts : undefined;
+    return posts.length ? posts : undefined;
+  } catch (error) {
+    return undefined;
+  }
 };
 
 export const getReactionByPostId = async (postId: number): Promise<Reaction[] | undefined> => {
@@ -212,6 +221,23 @@ export const getAllPostSchedule = async (): Promise<number[] | undefined> => {
     );
 
     return posts.length ? posts.map((post) => Number(post.id)) : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+export const getPostDetailBySlug = async (slug: string): Promise<Post | undefined> => {
+  try {
+    const [post] = await pool.query<Post[]>(
+      `SELECT p.id, p.title, p.published_at, p.image_url, p.content, u.full_name, u.avatar_url, t.id AS tag_id, t.tag_name
+       FROM post p
+       JOIN user u ON p.user_id = u.id
+       JOIN tag t ON p.tag_id = t.id
+       WHERE p.slug = ?`,
+      [slug],
+    );
+
+    return getFirstElement(post);
   } catch (error) {
     return undefined;
   }
