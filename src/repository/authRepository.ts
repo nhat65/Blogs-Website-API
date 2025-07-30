@@ -1,6 +1,8 @@
 import pool from '../config/database';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { getFirstElement } from '../utils/getFirstElement';
+import { getUserIdByAccountId } from './userRepository';
+import { get } from 'http';
 
 interface Account extends RowDataPacket {
   id: number;
@@ -18,14 +20,13 @@ interface AccountPayLoad {
   createBy: number | null;
 }
 
-export const checkAccountByUsername = async (username: string): Promise<Account | undefined> => {
+export const getAccountByUsername = async (username: string): Promise<Account | undefined> => {
   const [existingAccount] = await pool.query<Account[]>(
     `SELECT * FROM account WHERE username = ?`,
     [username],
   );
 
-  const account = getFirstElement<Account>(existingAccount);
-  return account;
+  return getFirstElement(existingAccount);
 };
 
 export const checkEmail = async (email: string): Promise<String | undefined> => {

@@ -122,7 +122,7 @@ export const getPostComments = async (req: Request, res: Response) => {
     }
 
     res.status(200).json({
-      success: false,
+      success: true,
       message: 'Get all comment successfully',
       data: result,
     });
@@ -155,10 +155,11 @@ export const getPostedPosts = async (req: Request, res: Response) => {
   }
 };
 
-export const getPostReaction = async (req: Request, res: Response) => {
+export const getPostReaction = async (req: AuthRequest, res: Response) => {
   const postId = parseInt(req.params.postId);
+  const userId = parseInt(req.params.userId) || undefined;
   try {
-    const result = await getReactionByPostId(postId);
+    const result = await getReactionByPostId(postId, userId);
     if (!result) {
       res.status(404).json({ success: false, message: 'There is no reaction!' });
       return;
@@ -186,22 +187,18 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
   };
   let imageUrl: string | null = req.body.imageUrl || null;
   const postId = parseInt(req.params.postId);
-  let userId: number | undefined;
   try {
     if (!slug) {
       slug = generateSlug(title);
-
       const existingSlug = await checkSlug(slug);
       if (existingSlug) {
         slug = generateSlug(slug, existingSlug);
       }
     }
-
     const currentPost = await getPostById(postId);
     if (!currentPost) {
       return res.status(404).json({ status: false, message: 'Post not found' });
     }
-
     if (slug !== currentPost?.slug) {
       const existingSlug = await checkSlug(slug);
       if (existingSlug?.length) {
@@ -213,8 +210,7 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    userId = await getUserIdByAccountId(req.user?.accountId);
-
+    const userId = await getUserIdByAccountId(req.user?.accountId);
     const updatePostPayload = {
       postId,
       title,
@@ -225,7 +221,7 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
       userId,
     };
 
-    const result = await updatePostById(updatePostPayload, req.user?.accountId);
+    const result = await updatePostById(updatePostPayload);
     if (!result) {
       deleteImage(imageUrl, req.user?.accountId);
       res.status(400).json({

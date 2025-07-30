@@ -11,4 +11,13 @@ router.post('/create', identifier, validateComment, commentController.createComm
 //Route handle update comment
 router.post('/update/:commentId', identifier, validateComment, commentController.updateComment);
 
+//Route handle get comment count
+router.get('/count/:postId', commentController.getCommentCount);
+
+//Route handle get replys by comment id
+router.get('/replies/:commentId', commentController.getReplyComments);
+
+//Route handle delete user comment
+router.delete('/:commentId', identifier, commentController.deleteOwnComment);
+
 export default router;

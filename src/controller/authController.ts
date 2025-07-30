@@ -2,12 +2,13 @@ import { Request, Response } from 'express';
 import { doHash, doHashValidation } from '../utils/hashing';
 import jwt from 'jsonwebtoken';
 import {
-  checkAccountByUsername,
   checkEmail,
   checkUsername,
   createAccount,
+  getAccountByUsername,
 } from '../repository/authRepository';
 import { Role } from '../constant/enum';
+import { getUserIdByAccountId } from '../repository/userRepository';
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   const { username, password } = req.body as {
@@ -15,7 +16,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     password: string;
   };
   try {
-    const account = await checkAccountByUsername(username);
+    const account = await getAccountByUsername(username);
     if (!account) {
       res.status(404).json({
         success: false,
@@ -33,6 +34,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    const userId = await getUserIdByAccountId(account.id);
     const token = jwt.sign(
       {
         accountId: account.id,
@@ -52,6 +54,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       .json({
         success: true,
         token,
+        user: {
+          userId: userId,
+          role: account.role,
+        },
         message: 'Login successfully!',
       });
   } catch (error) {

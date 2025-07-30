@@ -61,7 +61,7 @@ interface SchedulePostPayload {
 
 export const insertPost = async (post: PostPayload): Promise<boolean> => {
   const [result] = await pool.query<ResultSetHeader>(
-    `INSERT INTO post (title, slug, content, image_url, posted_at, status, tag_id, user_id)
+    `INSERT INTO post (title, slug, content, image_url, published_at, status, tag_id, user_id)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       post.title,
@@ -115,7 +115,11 @@ export const deleteUserPost = async (
 
 export const getCommentByPostId = async (postId: number): Promise<Comment[] | undefined> => {
   const [comments] = await pool.query<Comment[]>(
-    `SELECT * FROM comment WHERE post_id = ? AND  parent_id IS NULL`,
+    `SELECT c.id, c.content, c.create_at, u.full_name AS user_name, u.avatar_url AS user_avatar, c.user_id
+     FROM comment c 
+     JOIN user u ON c.user_id = u.id 
+     WHERE c.post_id = ? AND c.parent_id IS NULL
+     ORDER BY c.create_at DESC`,
     [postId],
   );
 
@@ -139,12 +143,52 @@ export const getAllPostedPost = async (): Promise<Post[] | undefined> => {
   }
 };
 
-export const getReactionByPostId = async (postId: number): Promise<Reaction[] | undefined> => {
-  const [reaction] = await pool.query<Reaction[]>(`SELECT * FROM post_reaction WHERE post_id = ?`, [
-    postId,
-  ]);
+export const getReactionByPostId = async (
+  postId: number,
+  userId?: number,
+): Promise<
+  | {
+      likes: number;
+      dislikes: number;
+      userReaction: ReactionType | null;
+    }
+  | undefined
+> => {
+  try {
+    const [results] = await pool.query<RowDataPacket[]>(
+      `
+      SELECT reaction, COUNT(*) as count, user_id
+      FROM post_reaction
+      WHERE post_id = ?
+      GROUP BY reaction, user_id
+      UNION
+      SELECT reaction, 0 as count, user_id
+      FROM post_reaction
+      WHERE post_id = ? AND user_id = ?
+      LIMIT 1
+      `,
+      [postId, postId, userId || null],
+    );
 
-  return reaction.length ? reaction : undefined;
+    const result = {
+      likes: 0,
+      dislikes: 0,
+      userReaction: null,
+    };
+    results.forEach((row: any) => {
+      if (row.count > 0) {
+        if (row.reaction === ReactionType.Like) result.likes = row.count;
+        else if (row.reaction === ReactionType.Dislike) result.dislikes = row.count;
+      }
+      if (row.user_id === userId) {
+        result.userReaction = row.reaction;
+      }
+    });
+
+    return result;
+  } catch (error) {
+    return undefined;
+  }
 };
 
 export const getPostById = async (postId: number): Promise<Post | undefined> => {
@@ -153,10 +197,7 @@ export const getPostById = async (postId: number): Promise<Post | undefined> => 
   return getFirstElement(post);
 };
 
-export const updatePostById = async (
-  updatePost: PostUpdatePayload,
-  accountId: number | undefined,
-): Promise<boolean> => {
+export const updatePostById = async (updatePost: PostUpdatePayload): Promise<boolean> => {
   try {
     const [result] = await pool.query<ResultSetHeader>(
       `UPDATE post 

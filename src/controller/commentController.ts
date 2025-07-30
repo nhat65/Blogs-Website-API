@@ -1,6 +1,10 @@
 import { AuthRequest } from '../middleware/identify';
 import {
   checkParentComment,
+  deleteCommentById,
+  getCommentById,
+  getCommentCountByPostId,
+  getReplysByCommentId,
   insertComment,
   updateUserComment,
 } from '../repository/commentRepository';
@@ -59,6 +63,7 @@ export const createComment = async (req: AuthRequest, res: Response) => {
       res.status(400).json({
         status: false,
         message: 'Create comment failed!',
+        data: comment,
       });
       return;
     }
@@ -81,11 +86,10 @@ export const updateComment = async (req: AuthRequest, res: Response) => {
     postId,
     parentId = null,
   } = req.body as { content: string; postId: number; parentId: number | null };
-  let userId: number | undefined;
   const accountId: number | undefined = req.user?.accountId;
   const commentId = parseInt(req.params.commentId);
   try {
-    userId = await getUserIdByAccountId(accountId);
+    const userId = await getUserIdByAccountId(accountId);
     if (!userId) {
       res.status(404).json({
         status: false,
@@ -113,7 +117,6 @@ export const updateComment = async (req: AuthRequest, res: Response) => {
         return;
       }
     }
-
     const comment = {
       commentId,
       content,
@@ -137,6 +140,82 @@ export const updateComment = async (req: AuthRequest, res: Response) => {
     res.status(400).json({
       status: false,
       message: '[Comment][Update] Request failed!',
+    });
+  }
+};
+
+export const getCommentCount = async (req: Request, res: Response) => {
+  const postId = parseInt(req.params.postId);
+  try {
+    const count = await getCommentCountByPostId(postId);
+    res.status(200).json({
+      status: true,
+      count,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      message: '[Comment][GetCount] Request failed!',
+    });
+  }
+};
+
+export const getReplyComments = async (req: Request, res: Response) => {
+  const commentId = parseInt(req.params.commentId);
+  try {
+    const replyComment = await getReplysByCommentId(commentId);
+    res.status(200).json({
+      status: true,
+      message: 'Get reply comments successfully',
+      data: replyComment,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      message: '[Comment][GetReply] Request failed!',
+    });
+  }
+};
+
+export const deleteOwnComment = async (req: AuthRequest, res: Response) => {
+  const commentId = parseInt(req.params.commentId);
+  const accountId: number | undefined = req.user?.accountId;
+  try {
+    const comment = await getCommentById(commentId);
+    if (!comment) {
+      res.status(404).json({
+        status: false,
+        message: 'Comment not found!',
+      });
+      return;
+    }
+
+    const userId = await getUserIdByAccountId(accountId);
+    if (!userId) {
+      res.status(404).json({
+        status: false,
+        message: 'User not found!',
+      });
+      return;
+    }
+
+    const result = await deleteCommentById(commentId, userId);
+    if (!result) {
+      res.status(400).json({
+        status: false,
+        message: 'Delete comment failed.',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      message: 'Delete comment successfully',
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      message: '[Comment][Delete] Request failed!',
     });
   }
 };

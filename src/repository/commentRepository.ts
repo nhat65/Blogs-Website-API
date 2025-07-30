@@ -78,3 +78,67 @@ export const updateUserComment = async (updateComment: UpdateCommentPayload): Pr
     return false;
   }
 };
+
+export const getCommentCountByPostId = async (postId: number): Promise<number> => {
+  try {
+    const [result] = await pool.query<RowDataPacket[]>(
+      `SELECT COUNT(*) AS count FROM comment WHERE post_id = ?`,
+      [postId],
+    );
+
+    return getFirstElement(result)?.count || 0;
+  } catch (error) {
+    return 0;
+  }
+};
+
+export const getReplysByCommentId = async (commentId: number): Promise<Comment[] | undefined> => {
+  try {
+    const [comments] = await pool.query<Comment[]>(
+      `SELECT c.id, c.content, c.create_at, u.full_name AS user_name, u.avatar_url AS user_avatar 
+     FROM comment c 
+     JOIN user u ON c.user_id = u.id 
+     WHERE c.parent_id = ?
+     ORDER BY c.create_at DESC`,
+      [commentId],
+    );
+
+    return comments.length ? comments : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+export const getCommentById = async (commentId: number): Promise<Comment | undefined> => {
+  try {
+    const [comments] = await pool.query<Comment[]>(`SELECT * FROM comment WHERE id = ?`, [
+      commentId,
+    ]);
+
+    return getFirstElement(comments);
+  } catch (error) {
+    return undefined;
+  }
+};
+
+export const deleteCommentById = async (
+  commentId: number,
+  userId: number | undefined,
+): Promise<boolean> => {
+  await pool.query('START TRANSACTION');
+  try {
+    await pool.query<ResultSetHeader>(`DELETE FROM comment WHERE parent_id = ?`, [commentId]);
+
+    const [result] = await pool.query<ResultSetHeader>(
+      `DELETE FROM comment WHERE id = ? AND user_id = ?`,
+      [commentId, userId],
+    );
+
+    await pool.query('COMMIT');
+
+    return !!result.affectedRows;
+  } catch (error) {
+    await pool.query('ROLLBACK');
+    return false;
+  }
+};
