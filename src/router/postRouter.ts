@@ -7,7 +7,7 @@ import { saveImage } from '../middleware/saveImage';
 const router: Router = express.Router();
 
 //Route handle login
-router.post('/createPost', identifier, saveImage(), validatePost, postController.createPost);
+router.post('/create', identifier, saveImage(), validatePost, postController.createPost);
 
 //Route handle user delete their post
 router.delete('/:postId', identifier, postController.deleteOwnPost);
@@ -16,7 +16,7 @@ router.delete('/:postId', identifier, postController.deleteOwnPost);
 router.get('/getComments/:postId', postController.getPostComments);
 
 //Route handle get reaction of post
-router.get('/getReaction/:postId', postController.getPostReaction);
+router.get('/getReaction/:postId/:userId', postController.getPostReaction);
 
 //Route handle get all post
 router.get('/', postController.getPostedPosts);
