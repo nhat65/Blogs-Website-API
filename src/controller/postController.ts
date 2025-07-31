@@ -117,7 +117,7 @@ export const getPostComments = async (req: Request, res: Response) => {
   try {
     const result = await getCommentByPostId(postId);
     if (!result) {
-      res.status(404).json({ success: false, message: 'There is no comment!' });
+      res.status(200).json({ success: true, message: 'There is no comment!', data: null });
       return;
     }
 

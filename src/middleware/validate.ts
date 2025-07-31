@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { NextFunction, Request, Response } from 'express';
 import { deleteImage } from '../utils/deleteImage';
 import { AuthRequest } from './identify';
-import { Role } from '../constant/enum';
+import { ReactionType, Role } from '../constant/enum';
 
 interface Login {
   username: string;
@@ -50,6 +50,24 @@ interface Tag {
   name: string;
   slug: string;
 }
+
+interface Reaction {
+  postId: number;
+  userId: number;
+  reactionType: ReactionType;
+}
+
+const reactionSchema = Joi.object<Reaction>({
+  postId: Joi.number().required().positive().integer(),
+  userId: Joi.number().optional().positive().integer(),
+  reactionType: Joi.string()
+    .valid(...Object.values(ReactionType))
+    .required()
+    .messages({
+      'any.required': 'reaction là bắt buộc',
+      'any.only': 'reaction không hợp lệ',
+    }),
+});
 
 const tagSchema = Joi.object<Tag>({
   name: Joi.string().min(3).max(50).required().messages({
@@ -199,6 +217,14 @@ const commentSchema = Joi.object<Comment>({
   }),
   parentId: Joi.number().optional(),
 });
+
+export const validateReaction = (req: Request, res: Response, next: NextFunction) => {
+  const { error } = reactionSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ status: false, message: error.details[0].message });
+  }
+  next();
+};
 
 export const validateTag = (req: Request, res: Response, next: NextFunction) => {
   const { error } = tagSchema.validate(req.body);

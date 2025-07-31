@@ -155,33 +155,42 @@ export const getReactionByPostId = async (
   | undefined
 > => {
   try {
-    const [results] = await pool.query<RowDataPacket[]>(
+    const [reactionResults] = await pool.query<RowDataPacket[]>(
       `
-      SELECT reaction, COUNT(*) as count, user_id
+      SELECT reaction, COUNT(*) as count
       FROM post_reaction
       WHERE post_id = ?
-      GROUP BY reaction, user_id
-      UNION
-      SELECT reaction, 0 as count, user_id
-      FROM post_reaction
-      WHERE post_id = ? AND user_id = ?
-      LIMIT 1
+      GROUP BY reaction
       `,
-      [postId, postId, userId || null],
+      [postId],
     );
+
+    let userReaction: ReactionType | null = null;
+    if (userId) {
+      const [userResult] = await pool.query<RowDataPacket[]>(
+        `
+        SELECT reaction
+        FROM post_reaction
+        WHERE post_id = ? AND user_id = ?
+        LIMIT 1
+        `,
+        [postId, userId],
+      );
+      if (userResult.length > 0) {
+        userReaction = getFirstElement(userResult)?.reaction as ReactionType;
+      }
+    }
 
     const result = {
       likes: 0,
       dislikes: 0,
-      userReaction: null,
+      userReaction,
     };
-    results.forEach((row: any) => {
-      if (row.count > 0) {
-        if (row.reaction === ReactionType.Like) result.likes = row.count;
-        else if (row.reaction === ReactionType.Dislike) result.dislikes = row.count;
-      }
-      if (row.user_id === userId) {
-        result.userReaction = row.reaction;
+    reactionResults.forEach((row: any) => {
+      if (row.reaction === ReactionType.Like) {
+        result.likes = row.count;
+      } else if (row.reaction === ReactionType.Dislike) {
+        result.dislikes = row.count;
       }
     });
 
