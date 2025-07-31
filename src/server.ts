@@ -9,6 +9,7 @@ import commentRouter from './router/commentRouter';
 import accountRouter from './router/accountRouter';
 import tagRouter from './router/tagRouter';
 import cookieParser from 'cookie-parser';
+import reactionRouter from './router/reactionRouter';
 
 import multer from 'multer';
 import { getAllPostSchedule } from './repository/postRepository';
@@ -33,6 +34,7 @@ app.use('/api/user', userRouter);
 app.use('/api/comment', commentRouter);
 app.use('/api/account', accountRouter);
 app.use('/api/tags', tagRouter);
+app.use('/api/reaction', reactionRouter);
 
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 

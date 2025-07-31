@@ -99,7 +99,7 @@ export const getReplysByCommentId = async (commentId: number): Promise<Comment[]
      FROM comment c 
      JOIN user u ON c.user_id = u.id 
      WHERE c.parent_id = ?
-     ORDER BY c.create_at DESC`,
+     ORDER BY c.create_at`,
       [commentId],
     );
 
