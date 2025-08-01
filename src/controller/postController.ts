@@ -5,10 +5,13 @@ import {
   checkSlug,
   deleteUserPost,
   getAllPostedPost,
+  getAllPosts,
   getCommentByPostId,
   getPostById,
   getPostDetailBySlug,
+  getPostsByUserId,
   getReactionByPostId,
+  getUpdatePostById,
   insertPost,
   insertSchedulePost,
   updatePostById,
@@ -138,12 +141,12 @@ export const getPostedPosts = async (req: Request, res: Response) => {
   try {
     const result = await getAllPostedPost();
     if (!result) {
-      res.status(404).json({ success: false, message: 'There is no post!' });
+      res.status(200).json({ success: false, message: 'There is no post!' });
       return;
     }
 
     res.status(200).json({
-      success: false,
+      success: true,
       message: 'Get all post successfully',
       data: result,
     });
@@ -330,6 +333,84 @@ export const getPostDetail = async (req: Request, res: Response) => {
     res.status(400).json({
       success: false,
       message: '[Post][GetDetail] Request failed!',
+    });
+  }
+};
+
+export const getUserPostsManagement = async (req: AuthRequest, res: Response) => {
+  const accountId = req.user?.accountId;
+  try {
+    const userId = await getUserIdByAccountId(accountId);
+    if (!userId) {
+      res.status(404).json({ success: false, message: 'User not found!' });
+      return;
+    }
+
+    const result = await getPostsByUserId(userId);
+    if (!result) {
+      res.status(200).json({ success: false, message: 'No posts found!' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Get user posts successfully',
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: '[Post][GetUserPosts] Request failed!',
+    });
+  }
+};
+
+export const getAllPostsManagement = async (req: Request, res: Response) => {
+  try {
+    const result = await getAllPosts();
+    if (!result) {
+      res.status(200).json({ success: false, message: 'No posts found!' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Get all posts successfully',
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: '[Post][GetAllPosts] Request failed!',
+    });
+  }
+};
+
+export const getUpdatePost = async (req: AuthRequest, res: Response) => {
+  const accountId = req.user?.accountId;
+  const postId = parseInt(req.params.postId);
+  try {
+    const userId = await getUserIdByAccountId(accountId);
+    if (!userId) {
+      res.status(404).json({ success: false, message: 'User not found!' });
+      return;
+    }
+
+    const result = await getUpdatePostById(postId, userId);
+    if (!result) {
+      res.status(404).json({ success: false, message: 'Post not found!' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Get post for update successfully',
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: '[Post][GetUpdatePostById] Request failed!',
     });
   }
 };

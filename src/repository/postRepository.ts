@@ -292,3 +292,55 @@ export const getPostDetailBySlug = async (slug: string): Promise<Post | undefine
     return undefined;
   }
 };
+
+export const getPostsByUserId = async (userId: number | undefined): Promise<Post[] | undefined> => {
+  try {
+    const [posts] = await pool.query<Post[]>(
+      `SELECT p.id, p.title, p.slug, p.create_at, p.status, t.tag_name
+       FROM post p 
+       JOIN tag t ON p.tag_id = t.id
+       WHERE p.user_id = ?
+       ORDER BY p.published_at DESC`,
+      [userId],
+    );
+
+    return posts.length ? posts : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+export const getAllPosts = async (): Promise<Post[] | undefined> => {
+  try {
+    const [posts] = await pool.query<Post[]>(
+      `SELECT p.id, p.title, p.slug, p.create_at, p.status, t.tag_name, u.full_name
+       FROM post p 
+       JOIN tag t ON p.tag_id = t.id
+       JOIN user u ON p.user_id = u.id
+       ORDER BY p.published_at DESC`,
+    );
+
+    return posts.length ? posts : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+export const getUpdatePostById = async (
+  postId: number,
+  userId: number,
+): Promise<Post | undefined> => {
+  try {
+    const [post] = await pool.query<Post[]>(
+      `SELECT p.id, p.title, p.published_at, p.image_url, p.content, t.id AS tag_id, t.tag_name
+       FROM post p
+       JOIN tag t ON p.tag_id = t.id
+       WHERE p.id = ? AND p.user_id = ?`,
+      [postId, userId],
+    );
+
+    return getFirstElement(post);
+  } catch (error) {
+    return undefined;
+  }
+};
