@@ -25,7 +25,7 @@ export const handleReaction = async (req: AuthRequest, res: Response) => {
       });
       return;
     }
-    
+
     const reactionPayload = {
       postId,
       userId,

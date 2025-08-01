@@ -32,11 +32,15 @@ interface UserUpdatePayload {
 export const getUserIdByAccountId = async (
   accountId: number | undefined,
 ): Promise<number | undefined> => {
-  const [userId] = await pool.query<User[]>(`SELECT id FROM user WHERE account_id = ?`, [
-    accountId,
-  ]);
+  try {
+    const [userId] = await pool.query<User[]>(`SELECT id FROM user WHERE account_id = ?`, [
+      accountId,
+    ]);
 
-  return getFirstElement(userId)?.id;
+    return getFirstElement(userId)?.id;
+  } catch (error) {
+    return undefined;
+  }
 };
 
 export const insertUser = async (user: UserPayload): Promise<boolean> => {
@@ -67,19 +71,16 @@ export const getUserByAccountId = async (
 
 export const updateUser = async (updateUser: UserUpdatePayload): Promise<boolean> => {
   try {
-    const [result] = await pool.query<ResultSetHeader>(
-      `UPDATE user 
-    SET full_name = ?, bio = ?, avatar_url = ?, country = ? 
-    WHERE id = ?`,
-      [
-        updateUser.fullName,
-        updateUser.bio,
-        updateUser.avatarUrl,
-        updateUser.country,
-        updateUser.userId,
-      ],
-    );
+    let query = `UPDATE user SET full_name = ?, bio = ?, country = ?`;
+    const params: any[] = [updateUser.fullName, updateUser.bio, updateUser.country];
+    if (updateUser.avatarUrl !== undefined && updateUser.avatarUrl !== null) {
+      query += `, avatar_url = ?`;
+      params.push(updateUser.avatarUrl);
+    }
+    query += ` WHERE id = ?`;
+    params.push(updateUser.userId);
 
+    const [result] = await pool.query<ResultSetHeader>(query, params);
     return !!result.affectedRows;
   } catch (error) {
     return false;

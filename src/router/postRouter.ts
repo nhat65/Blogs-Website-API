@@ -3,6 +3,7 @@ import * as postController from '../controller/postController';
 import { validateLogin, validatePost, validateRegister } from '../middleware/validate';
 import { identifier } from '../middleware/identify';
 import { saveImage } from '../middleware/saveImage';
+import { authorize } from '../middleware/authorization';
 
 const router: Router = express.Router();
 
@@ -29,5 +30,14 @@ router.post('/schedule', identifier, saveImage(), validatePost, postController.s
 
 //Route handle get post detail by slug
 router.get('/detail/:postSlug', postController.getPostDetail);
+
+//Route handle get user's posts by userId
+router.get('/user/', identifier, postController.getUserPostsManagement);
+
+//Route handle get all posts
+router.get('/all', identifier, authorize('admin'), postController.getAllPostsManagement);
+
+//Route handle get update post by id
+router.get('/updateDetail/:postId', identifier, postController.getUpdatePost);
 
 export default router;
