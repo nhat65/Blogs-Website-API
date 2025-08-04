@@ -95,7 +95,7 @@ export const getCommentCountByPostId = async (postId: number): Promise<number> =
 export const getReplysByCommentId = async (commentId: number): Promise<Comment[] | undefined> => {
   try {
     const [comments] = await pool.query<Comment[]>(
-      `SELECT c.id, c.content, c.create_at, u.full_name AS user_name, u.avatar_url AS user_avatar 
+      `SELECT c.id, c.content, c.create_at, c.user_id, u.full_name AS user_name, u.avatar_url AS user_avatar 
      FROM comment c 
      JOIN user u ON c.user_id = u.id 
      WHERE c.parent_id = ?
