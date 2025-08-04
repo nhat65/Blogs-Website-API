@@ -40,4 +40,10 @@ router.get('/all', identifier, authorize('admin'), postController.getAllPostsMan
 //Route handle get update post by id
 router.get('/updateDetail/:postId', identifier, postController.getUpdatePost);
 
+//Route handle get post by tag
+router.get('/tag/:tagSlug', postController.getPostByTag);
+
+//Route handle search post
+router.get('/search/:content', postController.searchPost);
+
 export default router;

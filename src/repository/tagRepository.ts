@@ -71,3 +71,13 @@ export const updateTagById = async (tag: TagUpdatePayload): Promise<boolean> => 
     return false;
   }
 };
+
+export const getTagIdBySlug = async (slug: string): Promise<number | undefined> => {
+  try {
+    const [tagId] = await pool.query<Tag[]>(`SELECT id FROM tag WHERE slug = ?`, [slug]);
+
+    return getFirstElement(tagId)?.id;
+  } catch (error) {
+    return undefined;
+  }
+};

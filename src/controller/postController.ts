@@ -8,6 +8,8 @@ import {
   getAllPosts,
   getCommentByPostId,
   getPostById,
+  getPostBySearchContent,
+  getPostByTagId,
   getPostDetailBySlug,
   getPostsByUserId,
   getReactionByPostId,
@@ -18,6 +20,7 @@ import {
 } from '../repository/postRepository';
 import { getUserIdByAccountId } from '../repository/userRepository';
 import { deleteImage } from '../utils/deleteImage';
+import { getTagIdBySlug } from '../repository/tagRepository';
 
 export const createPost = async (req: AuthRequest, res: Response) => {
   let { title, slug, content, tagId } = req.body as {
@@ -411,6 +414,65 @@ export const getUpdatePost = async (req: AuthRequest, res: Response) => {
     res.status(400).json({
       success: false,
       message: '[Post][GetUpdatePostById] Request failed!',
+    });
+  }
+};
+
+export const getPostByTag = async (req: Request, res: Response) => {
+  const { tagSlug } = req.params as { tagSlug: string };
+  try {
+    const tagId = await getTagIdBySlug(tagSlug);
+    if (!tagId) {
+      res.status(404).json({
+        status: false,
+        message: 'Tag not found!',
+      });
+      return;
+    }
+
+    const result = await getPostByTagId(tagId);
+    if (!result) {
+      res.status(200).json({
+        success: false,
+        message: 'No posts found!',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Get post by tag successfully',
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      message: '[Post][GetByTag] Request failed!',
+    });
+  }
+};
+
+export const searchPost = async (req: Request, res: Response) => {
+  const { content } = req.params as { content: string };
+  try {
+    const result = await getPostBySearchContent(content.toLowerCase());
+    if (!result) {
+      res.status(200).json({
+        status: false,
+        message: 'Post not found!',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      message: 'Search post successfully!',
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      message: '[Post][Search] Request failed!',
     });
   }
 };

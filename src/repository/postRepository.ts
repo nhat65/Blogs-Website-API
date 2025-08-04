@@ -344,3 +344,39 @@ export const getUpdatePostById = async (
     return undefined;
   }
 };
+
+export const getPostByTagId = async (tagId: number | undefined): Promise<Post[] | undefined> => {
+  try {
+    const [posts] = await pool.query<Post[]>(
+      `SELECT u.id, u.full_name, u.avatar_url, p.id, p.slug, p.title, p.image_url, p.published_at, t.slug AS tag_slug 
+    FROM post p 
+    JOIN user u ON p.user_id = u.id
+    JOIN tag t ON p.tag_id = t.id
+    WHERE p.status = 'posted' AND p.tag_id = ?
+    ORDER BY p.published_at DESC;`,
+      [tagId],
+    );
+
+    return posts.length ? posts : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+export const getPostBySearchContent = async (content: string): Promise<Post[] | undefined> => {
+  try {
+    const [posts] = await pool.query<Post[]>(
+      `SELECT u.id, u.full_name, u.avatar_url, p.id, p.slug, p.title, p.image_url, p.published_at, t.slug AS tag_slug 
+    FROM post p 
+    JOIN user u ON p.user_id = u.id
+    JOIN tag t ON p.tag_id = t.id
+    WHERE p.title LIKE ? OR u.full_name LIKE ?
+    ORDER BY p.published_at DESC;`,
+      [`%${content}%`, `%${content}%`],
+    );
+
+    return posts.length ? posts : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
