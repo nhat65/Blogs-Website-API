@@ -1,7 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import pool from '../config/database';
 import { getFirstElement } from '../utils/getFirstElement';
-import { ReactionType } from '../constant/enum';
+import { PostStatus, ReactionType, UserStatus } from '../constant/enum';
 
 interface PostPayload {
   title: string;
@@ -133,8 +133,9 @@ export const getAllPostedPost = async (): Promise<Post[] | undefined> => {
     FROM post p 
     JOIN user u ON p.user_id = u.id
     JOIN tag t ON p.tag_id = t.id
-    WHERE p.status = 'posted'
+    WHERE p.status = ? AND u.status IN (?, ?)
     ORDER BY p.published_at DESC;`,
+      [PostStatus.POSTED, UserStatus.ACTIVED, UserStatus.LOCKED],
     );
 
     return posts.length ? posts : undefined;
@@ -313,7 +314,7 @@ export const getPostsByUserId = async (userId: number | undefined): Promise<Post
 export const getAllPosts = async (): Promise<Post[] | undefined> => {
   try {
     const [posts] = await pool.query<Post[]>(
-      `SELECT p.id, p.title, p.slug, p.create_at, p.status, t.tag_name, u.full_name
+      `SELECT p.id, p.title, p.slug, p.published_at, p.status, t.tag_name, u.full_name
        FROM post p 
        JOIN tag t ON p.tag_id = t.id
        JOIN user u ON p.user_id = u.id

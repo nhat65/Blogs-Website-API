@@ -1,6 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import pool from '../config/database';
 import { getFirstElement } from '../utils/getFirstElement';
+import { UserStatus } from '../constant/enum';
 
 interface User extends RowDataPacket {
   id: number;
@@ -81,6 +82,65 @@ export const updateUser = async (updateUser: UserUpdatePayload): Promise<boolean
     params.push(updateUser.userId);
 
     const [result] = await pool.query<ResultSetHeader>(query, params);
+    return !!result.affectedRows;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const getAllUser = async (): Promise<User[] | undefined> => {
+  try {
+    const [users] = await pool.query<User[]>(
+      `SELECT u.id, u.full_name, u.avatar_url, u.joined_at, u.status, a.role, a.email
+      FROM user u
+      JOIN account a ON u.account_id = a.id
+      WHERE u.status IN (?, ?)`,
+      [UserStatus.ACTIVED, UserStatus.LOCKED],
+    );
+
+    return users.length ? users : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+export const deleteUserById = async (
+  userId: number,
+  adminId: number | undefined,
+): Promise<boolean> => {
+  try {
+    const [result] = await pool.query<ResultSetHeader>(
+      `UPDATE user SET status = ?, update_by = ?
+      WHERE id = ?`,
+      [UserStatus.DELETED, adminId, userId],
+    );
+
+    return !!result.affectedRows;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const lockUserById = async (userId: number, adminUserId: number): Promise<boolean> => {
+  try {
+    const [result] = await pool.query<ResultSetHeader>(
+      `UPDATE user SET status = ?, update_by = ? WHERE id = ?`,
+      [UserStatus.LOCKED, adminUserId, userId],
+    );
+
+    return !!result.affectedRows;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const unlockUserById = async (userId: number, adminUserId: number): Promise<boolean> => {
+  try {
+    const [result] = await pool.query<ResultSetHeader>(
+      `UPDATE user SET status = ?, update_by = ? WHERE id = ?`,
+      [UserStatus.ACTIVED, adminUserId, userId],
+    );
+
     return !!result.affectedRows;
   } catch (error) {
     return false;
