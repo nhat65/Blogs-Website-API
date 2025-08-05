@@ -1,9 +1,13 @@
 import { deleteImage } from '../utils/deleteImage';
 import { AuthRequest } from '../middleware/identify';
 import {
+  deleteUserById,
+  getAllUser,
   getUserByAccountId,
   getUserIdByAccountId,
   insertUser,
+  lockUserById,
+  unlockUserById,
   updateUser,
 } from '../repository/userRepository';
 import { Request, Response } from 'express';
@@ -120,6 +124,130 @@ export const updateUserProfile = async (req: AuthRequest, res: Response) => {
     res.status(400).json({
       status: false,
       message: '[User][Update] Request failed!',
+    });
+  }
+};
+
+export const getUsers = async (req: Request, res: Response) => {
+  try {
+    const result = await getAllUser();
+    if (!result) {
+      res.status(200).json({
+        status: false,
+        message: 'There is no user.',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      message: 'Get all user successfully!',
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      message: '[User][GetAll] Request fail!',
+    });
+  }
+};
+
+export const deleteUser = async (req: AuthRequest, res: Response) => {
+  const userId = parseInt(req.params.userId);
+  const adminAccountId = req.user?.accountId;
+  try {
+    const adminId = await getUserIdByAccountId(adminAccountId);
+    if (!adminId) {
+      res.status(404).json({
+        status: false,
+        message: 'User not found!',
+      });
+      return;
+    }
+
+    const result = await deleteUserById(userId, adminId);
+    if (!result) {
+      res.status(400).json({
+        status: false,
+        message: 'Delete user fail!',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      message: 'Delete user successfully.',
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      message: '[User][DeleteByAdmin] Request faild!',
+    });
+  }
+};
+
+export const lockUser = async (req: AuthRequest, res: Response) => {
+  const userId = parseInt(req.params.userId);
+  const adminAccountId = req.user?.accountId;
+  try {
+    const adminUserId = await getUserIdByAccountId(adminAccountId);
+    if (!adminUserId) {
+      res.status(404).json({
+        status: false,
+        message: 'User not found!',
+      });
+      return;
+    }
+
+    const result = await lockUserById(userId, adminUserId);
+    if (!result) {
+      res.status(400).json({
+        status: false,
+        message: 'Lock user fail!',
+      });
+    }
+
+    res.status(200).json({
+      status: true,
+      message: 'Lock user successfully.',
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      message: '[User][Lock] Request fail!',
+    });
+  }
+};
+
+export const unlockUser = async (req: AuthRequest, res: Response) => {
+  const userId = parseInt(req.params.userId);
+  const adminAccountId = req.user?.accountId;
+  try {
+    const adminUserId = await getUserIdByAccountId(adminAccountId);
+    if (!adminUserId) {
+      res.status(404).json({
+        status: false,
+        message: 'User not found!',
+      });
+      return;
+    }
+
+    const result = await unlockUserById(userId, adminUserId);
+    if (!result) {
+      res.status(400).json({
+        status: false,
+        message: 'Unlock user fail!',
+      });
+    }
+
+    res.status(200).json({
+      status: true,
+      message: 'Unlock user successfully.',
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      message: '[User][Unlock] Request fail!',
     });
   }
 };

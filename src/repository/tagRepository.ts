@@ -23,7 +23,13 @@ interface TagUpdatePayload {
 
 export const getAllTags = async (): Promise<Tag[] | undefined> => {
   try {
-    const [tags] = await pool.query<Tag[]>('SELECT * FROM tag');
+    const [tags] = await pool.query<
+      Tag[]
+    >(`SELECT t.id, t.tag_name, t.slug, t.create_at, COUNT(p.id) AS post_count 
+      FROM tag t
+      LEFT JOIN post p ON t.id = p.tag_id
+      GROUP BY t.id`);
+
     return tags.length ? tags : undefined;
   } catch (error) {
     return undefined;
@@ -43,8 +49,14 @@ export const insertTag = async (tag: TagPayload): Promise<boolean> => {
 };
 
 export const deleteTagById = async (id: number): Promise<boolean> => {
+  await pool.query('START TRANSACTION');
   try {
+    await pool.query<ResultSetHeader>(`DELETE FROM post WHERE tag_id = ?`, [id]);
+
     const [result] = await pool.query<ResultSetHeader>('DELETE FROM tag WHERE id = ?', [id]);
+
+    await pool.query('COMMIT');
+
     return !!result.affectedRows;
   } catch (error) {
     return false;

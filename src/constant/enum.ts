@@ -7,3 +7,14 @@ export enum ReactionType {
   Like = 'like',
   Dislike = 'dislike',
 }
+
+export const enum UserStatus {
+  ACTIVED = 'actived',
+  LOCKED = 'locked',
+  DELETED = 'deleted',
+}
+
+export const enum PostStatus {
+  POSTED = 'posted',
+  SCHEDULED = 'scheduled',
+}
