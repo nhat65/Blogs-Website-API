@@ -8,7 +8,7 @@ import {
   getAccountByUsername,
 } from '../repository/authRepository';
 import { Role } from '../constant/enum';
-import { getUserIdByAccountId } from '../repository/userRepository';
+import { getUserByAccountId } from '../repository/userRepository';
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   const { username, password } = req.body as {
@@ -34,7 +34,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const userId = await getUserIdByAccountId(account.id);
+    const user = await getUserByAccountId(account.id);
     const token = jwt.sign(
       {
         accountId: account.id,
@@ -55,8 +55,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         success: true,
         token,
         user: {
-          userId: userId,
+          userId: user?.id,
           role: account.role,
+          status: user?.status,
         },
         message: 'Login successfully!',
       });

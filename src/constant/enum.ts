@@ -17,4 +17,11 @@ export const enum UserStatus {
 export const enum PostStatus {
   POSTED = 'posted',
   SCHEDULED = 'scheduled',
+  HIDDEN = 'hidden',
+}
+
+export const enum ReportStatus {
+  PENDING = 'pending',
+  RESOLVED = 'resolved',
+  DISMISSED = 'dismissed',
 }
