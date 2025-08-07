@@ -3,6 +3,7 @@ import {
   checkParentComment,
   deleteCommentById,
   getCommentById,
+  getCommentByUserId,
   getCommentCountByPostId,
   getReplysByCommentId,
   insertComment,
@@ -216,6 +217,40 @@ export const deleteOwnComment = async (req: AuthRequest, res: Response) => {
     res.status(400).json({
       status: false,
       message: '[Comment][Delete] Request failed!',
+    });
+  }
+};
+
+export const getOwnComment = async (req: AuthRequest, res: Response) => {
+  const accountId = req.user?.accountId;
+  try {
+    const userId = await getUserIdByAccountId(accountId);
+    if (!userId) {
+      res.status(404).json({
+        status: false,
+        message: 'User not found!',
+      });
+      return;
+    }
+
+    const result = await getCommentByUserId(userId);
+    if (!result) {
+      res.status(200).json({
+        status: false,
+        message: 'No comment found.',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      message: 'Get comment successfully.',
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      message: '[Comment][GetOwn] Request failed!',
     });
   }
 };

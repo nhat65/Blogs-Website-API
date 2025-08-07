@@ -10,6 +10,7 @@ interface User extends RowDataPacket {
   avatarUrl: string;
   country: string;
   accountId: number;
+  status: UserStatus;
   joinedAt: Date;
 }
 

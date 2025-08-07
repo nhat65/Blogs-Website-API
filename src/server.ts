@@ -10,9 +10,8 @@ import accountRouter from './router/accountRouter';
 import tagRouter from './router/tagRouter';
 import cookieParser from 'cookie-parser';
 import reactionRouter from './router/reactionRouter';
+import reportRouter from './router/reportRouter';
 
-import multer from 'multer';
-import { getAllPostSchedule } from './repository/postRepository';
 import { schedulePostPublication } from './utils/postSchedule';
 import path from 'path';
 
@@ -25,6 +24,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   }),
 );
 
@@ -35,6 +35,7 @@ app.use('/api/comment', commentRouter);
 app.use('/api/account', accountRouter);
 app.use('/api/tags', tagRouter);
 app.use('/api/reaction', reactionRouter);
+app.use('/api/report', reportRouter);
 
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 

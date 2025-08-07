@@ -51,6 +51,21 @@ export const insertTag = async (tag: TagPayload): Promise<boolean> => {
 export const deleteTagById = async (id: number): Promise<boolean> => {
   await pool.query('START TRANSACTION');
   try {
+    await pool.query<ResultSetHeader>(
+      `DELETE FROM comment WHERE post_id IN (SELECT id FROM post WHERE tag_id = ?)AND parent_id IS NOT NULL;`,
+      [id],
+    );
+
+    await pool.query<ResultSetHeader>(
+      `DELETE FROM comment WHERE post_id IN (SELECT id FROM post WHERE tag_id = ?)AND parent_id IS NULL;`,
+      [id],
+    );
+
+    await pool.query<ResultSetHeader>(
+      `DELETE FROM post_reaction WHERE post_id IN (SELECT id FROM post WHERE tag_id = ?);`,
+      [id],
+    );
+
     await pool.query<ResultSetHeader>(`DELETE FROM post WHERE tag_id = ?`, [id]);
 
     const [result] = await pool.query<ResultSetHeader>('DELETE FROM tag WHERE id = ?', [id]);

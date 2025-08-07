@@ -20,4 +20,7 @@ router.get('/replies/:commentId', commentController.getReplyComments);
 //Route handle delete user comment
 router.delete('/:commentId', identifier, commentController.deleteOwnComment);
 
+//Route handle get user's comments
+router.get('/me', identifier, commentController.getOwnComment);
+
 export default router;

@@ -57,6 +57,21 @@ interface Reaction {
   reactionType: ReactionType;
 }
 
+interface Report {
+  content: string;
+  postId: number;
+}
+
+const reportSchema = Joi.object<Report>({
+  content: Joi.string().min(10).max(1000).required().messages({
+    'string.empty': 'Report content must not be empty',
+    'any.required': 'Report content is required',
+  }),
+  postId: Joi.number().integer().positive().required().messages({
+    'any.required': 'Post ID is required',
+  }),
+});
+
 const reactionSchema = Joi.object<Reaction>({
   postId: Joi.number().required().positive().integer(),
   userId: Joi.number().optional().positive().integer(),
@@ -169,7 +184,7 @@ const postSchema = Joi.object<Post>({
     .optional()
     .empty('')
     .trim()
-    .pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .pattern(/^[a-z0-9\-:?!.,()'" ]+$/i)
     .min(3)
     .max(255)
     .messages({
@@ -217,6 +232,14 @@ const commentSchema = Joi.object<Comment>({
   }),
   parentId: Joi.number().optional(),
 });
+
+export const validateReport = (req: Request, res: Response, next: NextFunction) => {
+  const { error } = reportSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ status: false, message: error.details[0].message });
+  }
+  next();
+};
 
 export const validateReaction = (req: Request, res: Response, next: NextFunction) => {
   const { error } = reactionSchema.validate(req.body);

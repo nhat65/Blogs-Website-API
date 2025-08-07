@@ -142,3 +142,22 @@ export const deleteCommentById = async (
     return false;
   }
 };
+
+export const getCommentByUserId = async (
+  userId: number | undefined,
+): Promise<Comment[] | undefined> => {
+  try {
+    const [comments] = await pool.query<Comment[]>(
+      `SELECT c.id, c.content, c.parent_id, p.title AS post_title, p.slug AS post_slug, t.slug AS tag_slug
+      FROM comment c
+      JOIN post p ON c.post_id = p.id
+      JOIN tag t ON p.tag_id = t.id
+      WHERE c.user_id = ?`,
+      [userId],
+    );
+
+    return comments.length ? comments : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
