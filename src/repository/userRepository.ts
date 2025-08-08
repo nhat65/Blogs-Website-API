@@ -12,6 +12,7 @@ interface User extends RowDataPacket {
   accountId: number;
   status: UserStatus;
   joinedAt: Date;
+  email: string;
 }
 
 interface UserPayload {
@@ -63,7 +64,13 @@ export const getUserByAccountId = async (
   accountId: number | undefined,
 ): Promise<User | undefined> => {
   try {
-    const [user] = await pool.query<User[]>(`SELECT * FROM user WHERE account_id = ?`, [accountId]);
+    const [user] = await pool.query<User[]>(
+      `SELECT u.id, u.full_name, u.bio, u.avatar_url, u.country, u.status, u.joined_at, a.email 
+      FROM user u
+      JOIN account a ON u.account_id = a.id
+      WHERE u.account_id = ?`,
+      [accountId],
+    );
 
     return getFirstElement(user);
   } catch (error) {
@@ -145,5 +152,21 @@ export const unlockUserById = async (userId: number, adminUserId: number): Promi
     return !!result.affectedRows;
   } catch (error) {
     return false;
+  }
+};
+
+export const getUserByAppealId = async (userId: number | undefined): Promise<User | undefined> => {
+  try {
+    const [user] = await pool.query<User[]>(
+      `SELECT u.id, u.full_name, u.bio, u.avatar_url, u.country, u.status, u.joined_at, a.email 
+      FROM user u
+      JOIN account a ON u.account_id = a.id
+      WHERE u.id = (SELECT user_id FROM appeal WHERE id = ?)`,
+      [userId],
+    );
+
+    return getFirstElement(user);
+  } catch (error) {
+    return undefined;
   }
 };

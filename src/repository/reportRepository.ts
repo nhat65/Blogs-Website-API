@@ -85,7 +85,7 @@ export const resolveReportById = async (reportId: number, userId: number): Promi
     );
 
     const [result] = await pool.query<ResultSetHeader>(
-      `UPDATE report SET status = ?, resolved_by = ? WHERE post_id = (SELECT post_id FROM report WHERE id = ?)`,
+      `UPDATE report SET status = ?, resolved_by = ? WHERE post_id IN (SELECT post_id FROM report WHERE id = ?)`,
       [ReportStatus.RESOLVED, userId, reportId],
     );
 
