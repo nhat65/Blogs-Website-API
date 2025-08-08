@@ -25,3 +25,14 @@ export const enum ReportStatus {
   RESOLVED = 'resolved',
   DISMISSED = 'dismissed',
 }
+
+export const enum AppealStatus {
+  PENDING = 'pending',
+  RESOLVED = 'resolved',
+  REJECTED = 'rejected',
+}
+
+export const enum AppealTypes {
+  POST = 'post',
+  USER = 'user',
+}

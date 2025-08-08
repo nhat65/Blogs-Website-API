@@ -381,3 +381,19 @@ export const getPostBySearchContent = async (content: string): Promise<Post[] | 
     return undefined;
   }
 };
+
+export const getPostByAppealId = async (userId: number | undefined): Promise<Post | undefined> => {
+  try {
+    const [post] = await pool.query<Post[]>(
+      `SELECT *
+      FROM post p
+      JOIN user u ON p.user_id = u.id
+      WHERE u.id = (SELECT user_id FROM appeal WHERE id = ?)`,
+      [userId],
+    );
+
+    return getFirstElement(post);
+  } catch (error) {
+    return undefined;
+  }
+};

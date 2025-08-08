@@ -11,6 +11,7 @@ import tagRouter from './router/tagRouter';
 import cookieParser from 'cookie-parser';
 import reactionRouter from './router/reactionRouter';
 import reportRouter from './router/reportRouter';
+import appealRouter from './router/appealRouter';
 
 import { schedulePostPublication } from './utils/postSchedule';
 import path from 'path';
@@ -36,6 +37,7 @@ app.use('/api/account', accountRouter);
 app.use('/api/tags', tagRouter);
 app.use('/api/reaction', reactionRouter);
 app.use('/api/report', reportRouter);
+app.use('/api/appeal', appealRouter);
 
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 

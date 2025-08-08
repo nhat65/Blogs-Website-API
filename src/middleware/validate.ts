@@ -62,8 +62,40 @@ interface Report {
   postId: number;
 }
 
+interface Appeal {
+  postId: number;
+  reason: string;
+  message: string;
+}
+
+const appealSchema = Joi.object<Appeal>({
+  postId: Joi.number().integer().positive().required().messages({
+    'any.required': 'Post ID is required',
+    'number.base': 'Post ID must be a number',
+    'number.positive': 'Post ID must be positive',
+  }),
+  reason: Joi.string().min(3).max(255).required().messages({
+    'string.empty': 'Reason is required',
+    'string.min': 'Reason must be at least 3 characters',
+    'string.max': 'Reason must not exceed 255 characters',
+    'any.required': 'Reason is required',
+  }),
+  message: Joi.string().min(5).max(1000).optional().empty('').messages({
+    'string.min': 'Message must be at least 5 characters',
+    'string.max': 'Message must not exceed 1000 characters',
+  }),
+});
+
+export const validateAppeal = (req: Request, res: Response, next: NextFunction) => {
+  const { error } = appealSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ status: false, message: error.details[0].message });
+  }
+  next();
+};
+
 const reportSchema = Joi.object<Report>({
-  content: Joi.string().min(10).max(1000).required().messages({
+  content: Joi.string().max(1000).required().messages({
     'string.empty': 'Report content must not be empty',
     'any.required': 'Report content is required',
   }),
